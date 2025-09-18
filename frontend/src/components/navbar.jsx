@@ -13,8 +13,8 @@ function Navbar() {
         <a href="#" className="navlink">SELL</a>
       </div>
       <div className="flex space-x-4">
-        <button className="navbutt">WHISH</button>
-        <button className="navbutt">LOGI</button>
+        <button className="navbutt">WISH</button>
+        <button className="navbutt">LOGIN</button>
       </div>
     </div>
   )

@@ -9,7 +9,7 @@
 }
 
 .input-style{
-    @apply h-10 w-90 rounded-l-sm px-4 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500
+    @apply h-10 w-80 rounded-l-sm px-4 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500
 }
 
 .inp-button{

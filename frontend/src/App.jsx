@@ -11,9 +11,7 @@ function App() {
       <div style={{ paddingTop: '80px' }}>
         <Hero />
       </div>
-
     </div>
-    
   );
 }
 export default App;
