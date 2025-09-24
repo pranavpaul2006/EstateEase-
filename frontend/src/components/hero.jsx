@@ -2,7 +2,7 @@ import React from 'react'
 
 function Hero() {
   return (
-    <div className='h-screen mb-100'>
+    <div className='h-screen mb-100 pt-20'>
         <div className=" h-64  pt-40  bg-[url('.\images\bg-hero-estateease.jpg')] bg-fit">
             <div className='flex justify-center gap-x-20 mt-[-90px]'>
                 <div>

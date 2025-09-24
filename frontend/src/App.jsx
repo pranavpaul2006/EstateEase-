@@ -1,17 +1,24 @@
 import React from 'react';
 import Navbar from './components/navbar';
 import Hero from './components/hero';
+import { Route, Routes } from 'react-router-dom';
+import Contact from './pages/Contact';
+import Cart from './pages/Cart';
 
 function App() {
   return (
-    <div>   
+    <router>
+      <div>   
       <div>
         <Navbar />
       </div>
-      <div style={{ paddingTop: '80px' }}>
-        <Hero />
-      </div>
+      <Routes>
+        <Route path="/" element={<Hero />} />
+        <Route path="/contact" element={<Contact />}/>
+        <Route path="/cart" element={<Cart />}/>
+      </Routes>
     </div>
+    </router>
   );
 }
 export default App;
