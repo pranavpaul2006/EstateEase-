@@ -8,7 +8,7 @@ function Navbar() {
         <div className="flex space-x-4 items-center ">
           <img src=".\src\images\estateease-logo.png" className="h-20 w-20" />
           <Link to="/">
-            <p className="font-bold text-2xl text-white">EateEase</p>
+            <p className="font-bold text-2xl text-white">EstateEase</p>
           </Link>
         </div>
         <a href="#" className="navlink">
