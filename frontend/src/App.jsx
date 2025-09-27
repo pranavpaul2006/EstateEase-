@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from './components/navbar';
-import Hero from './components/hero';
+import Home from './components/home';
 import { Route, Routes } from 'react-router-dom';
 import Contact from './pages/Contact';
 import Cart from './pages/Cart';
@@ -9,15 +9,15 @@ function App() {
   return (
     <router>
       <div>   
-      <div>
-        <Navbar />
+        <div>
+          <Navbar />
+        </div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/contact" element={<Contact />}/>
+          <Route path="/cart" element={<Cart />}/>
+        </Routes>
       </div>
-      <Routes>
-        <Route path="/" element={<Hero />} />
-        <Route path="/contact" element={<Contact />}/>
-        <Route path="/cart" element={<Cart />}/>
-      </Routes>
-    </div>
     </router>
   );
 }

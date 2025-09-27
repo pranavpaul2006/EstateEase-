@@ -1,188 +1,50 @@
-import React from 'react'
+import React from 'react';
 
 function Hero() {
   return (
-    <div className='h-screen mb-100 pt-20'>
-        <div className=" h-64  pt-40  bg-[url('.\images\bg-hero-estateease.jpg')] bg-fit">
-            <div className='flex justify-center gap-x-20 mt-[-90px]'>
-                <div>
-                    <input
-                    type="text"
-                    placeholder="Enter location or city"
-                    className="input-style"
-                    />  
-                    <button className='inp-button'>V</button>
-                </div>
-                <div>
-                    <input
-                    type="text"
-                    placeholder="Property type"
-                    className="input-style"
-                    />
-                    <button className='inp-button'>V</button>
-                </div>
-            <button className="bg-blue-500 text-white h-10 px-6 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                Search
-            </button>
-            </div>
-        </div>
-        <div className='grid mt-8 grid-cols-[1fr_1fr_1fr] gap-8 px-8'>
-            <div className='border h-90 '>
-                <div className='border h-50'>
-                    <img src="src\images\bg-hero-estateease.jpg" className='h-50 w-90'/>
-                </div>
-                <div>
-                    <div><p className='border'>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, facilis?
-                    </p></div>
-                    <div className='flex justify-center '>
-                        <div>
-                            <p className='border'>
-                            Location
-                            </p>
-                        </div>
-                        <div>
-                            <p className='border'>
-                            price
-                            </p>
-                        </div>
-                    </div>
-                    <div><p className='border'>
-                        price
-                    </p></div>
-                </div>
-            </div>
-            <div className='border h-90 '>
-                <div className='border h-50'>
-                    <img src="src\images\bg-hero-estateease.jpg" className='h-50 w-90'/>
-                </div>
-                <div>
-                    <div><p className='border'>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, facilis?
-                    </p></div>
-                    <div className='flex justify-center '>
-                        <div>
-                            <p className='border'>
-                            Location
-                            </p>
-                        </div>
-                        <div>
-                            <p className='border'>
-                            price
-                            </p>
-                        </div>
-                    </div>
-                    <div><p className='border'>
-                        price
-                    </p></div>
-                </div>
-            </div>
-            <div className='border h-90 '>
-                <div className='border h-50'>
-                    <img src="src\images\bg-hero-estateease.jpg" className='h-50 w-90'/>
-                </div>
-                <div>
-                    <div><p className='border'>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, facilis?
-                    </p></div>
-                    <div className='flex justify-center '>
-                        <div>
-                            <p className='border'>
-                            Location
-                            </p>
-                        </div>
-                        <div>
-                            <p className='border'>
-                            price
-                            </p>
-                        </div>
-                    </div>
-                    <div><p className='border'>
-                        price
-                    </p></div>
-                </div>
-            </div>
-            <div className='border h-90 '>
-                <div className='border h-50'>
-                    <img src="src\images\bg-hero-estateease.jpg" className='h-50 w-90'/>
-                </div>
-                <div>
-                    <div><p className='border'>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, facilis?
-                    </p></div>
-                    <div className='flex justify-center '>
-                        <div>
-                            <p className='border'>
-                            Location
-                            </p>
-                        </div>
-                        <div>
-                            <p className='border'>
-                            price
-                            </p>
-                        </div>
-                    </div>
-                    <div><p className='border'>
-                        price
-                    </p></div>
-                </div>
-            </div>
+    <div className="relative w-full h-[31rem]">
+      <div className="absolute inset-0 bg-[#f2f2f2]"></div>
 
-            <div className='border h-90 '>
-                <div className='border h-50'>
-                    <img src="src\images\bg-hero-estateease.jpg" className='h-50 w-90'/>
-                </div>
-                <div>
-                    <div><p className='border'>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, facilis?
-                    </p></div>
-                    <div className='flex justify-center '>
-                        <div>
-                            <p className='border'>
-                            Location
-                            </p>
-                        </div>
-                        <div>
-                            <p className='border'>
-                            price
-                            </p>
-                        </div>
-                    </div>
-                    <div><p className='border'>
-                        price
-                    </p></div>
-                </div>
-            </div>
+      <div className="relative flex flex-col items-center justify-center h-full px-4">
+        <h1 className="text-black text-4xl md:text-5xl font-bold mb-8 text-center">
+          Find Your Dream Property
+        </h1>
+        <p className="text-black/80 mb-6 text-center max-w-2xl">
+          Search from thousands of properties across your favorite cities
+        </p>
 
-            <div className='border h-90  '>
-                <div className='border h-50'>
-                    <img src="src\images\bg-hero-estateease.jpg" className='h-50 w-90'/>
-                </div>
-                <div>
-                    <div><p className='border'>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, facilis?
-                    </p></div>
-                    <div className='flex justify-center '>
-                        <div>
-                            <p className='border'>
-                            Location
-                            </p>
-                        </div>
-                        <div>
-                            <p className='border'>
-                            price
-                            </p>
-                        </div>
-                    </div>
-                    <div><p className='border'>
-                        price
-                    </p></div>
-                </div>
-            </div>
+        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full max-w-4xl">
+          {/* Location Input */}
+          <div className="relative flex items-center bg-white rounded-lg shadow-md overflow-hidden">
+            <input
+              type="text"
+              placeholder="Enter location or city"
+              className="px-4 py-2 w-60 md:w-80 focus:outline-none text-gray-700 placeholder-gray-400 pr-10"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+              ▼
+            </span>
+          </div>
+
+          {/* Property Type Input */}
+          <div className="relative flex items-center bg-white rounded-lg shadow-md overflow-hidden">
+            <input
+              type="text"
+              placeholder="Property type"
+              className="px-4 py-2 w-40 md:w-60 focus:outline-none text-gray-700 placeholder-gray-400 pr-10"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+              ▼
+            </span>
+          </div>
+
+          <button className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
+            Search
+          </button>
         </div>
+      </div>
     </div>
-    
-  )
+  );
 }
 
-export default Hero
+export default Hero;
