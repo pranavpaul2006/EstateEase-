@@ -6,7 +6,7 @@ function Navbar() {
     <div className="bg-blue-500 h-20 flex items-center justify-between px-6 fixed w-full z-10 ">
       <div className="flex items-center space-x-12">
         <div className="flex space-x-4 items-center ">
-          <img src="#" alt="EE" className="h-10" />
+          <img src=".\src\images\estateease-logo.png" className="h-20 w-20" />
           <Link to="/">
             <p className="font-bold text-2xl text-white">EstateEase</p>
           </Link>
