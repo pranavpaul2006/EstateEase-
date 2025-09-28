@@ -1,13 +1,17 @@
+// src/components/navbar.jsx
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../images/estateease-logo.png";
 
-function Navbar() {
+// Accept the onLoginClick prop
+function Navbar({ onLoginClick }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <nav className="bg-[#52ab98] fixed w-full z-20 shadow-md">
       <div className="px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        {/* ... (Logo code remains the same) ... */}
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center">
             <img
@@ -23,6 +27,7 @@ function Navbar() {
 
         <div className="flex items-center">
           <div className="hidden md:flex items-center gap-6">
+            {/* ... (Other links remain the same) ... */}
             <a
               href="#"
               className="text-white hover:text-gray-200 font-semibold"
@@ -46,13 +51,17 @@ function Navbar() {
                 WISH
               </button>
             </Link>
-            <Link to="/contact">
-              <button className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100">
-                LOGIN
-              </button>
-            </Link>
+
+            {/* CHANGE THIS: From a <Link> to a <button> with an onClick handler */}
+            <button
+              onClick={onLoginClick}
+              className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100"
+            >
+              LOGIN
+            </button>
           </div>
 
+          {/* ... (Mobile menu toggle remains the same) ... */}
           <div className="md:hidden flex items-center ml-4">
             <button
               onClick={() => setIsOpen((s) => !s)}
@@ -82,6 +91,7 @@ function Navbar() {
         </div>
       </div>
 
+      {/* Mobile Dropdown */}
       <div
         className={`md:hidden absolute left-0 right-0 top-full bg-[#52ab98] overflow-hidden transition-[max-height] duration-300 ${
           isOpen ? "max-h-96" : "max-h-0"
@@ -89,6 +99,7 @@ function Navbar() {
         style={{ zIndex: 19 }}
       >
         <div className="px-4 pb-4 pt-3">
+          {/* ... (Other mobile links remain the same) ... */}
           <a
             href="#"
             className="block py-2 text-white font-semibold hover:text-gray-200"
@@ -113,11 +124,17 @@ function Navbar() {
                 WISH
               </button>
             </Link>
-            <Link to="/contact">
-              <button className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
-                LOGIN
-              </button>
-            </Link>
+
+            {/* CHANGE THIS FOR MOBILE: From a <Link> to a <button> */}
+            <button
+              onClick={() => {
+                onLoginClick();
+                setIsOpen(false);
+              }}
+              className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100"
+            >
+              LOGIN
+            </button>
           </div>
         </div>
       </div>
