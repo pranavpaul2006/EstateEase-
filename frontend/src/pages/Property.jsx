@@ -13,8 +13,8 @@ const Property = () => {
   };
 
   return (
-    <div className="bg-gray-50 h-screen pt-20">
-      <div className="bg-gray-50 w-full h-full flex flex-col p-4 sm:p-6 lg:p-10">
+    <div className="bg-gray-50 min-h-screen pt-20 pb-0.25">
+      <div className="bg-gray-50 w-full h-full flex flex-col p-4 sm:p-6 lg:p-8">
         {/* --- TOP SECTION: Image and Core Details --- */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
           {/* Image Column */}
