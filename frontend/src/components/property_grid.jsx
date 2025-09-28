@@ -1,14 +1,38 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function PropertyGrid() {
   const properties = [
-    { location: "Bengaluru, Indiranagar", price: "₹45,00,000", img: "src/images/bg-hero-estateease.jpg" },
-    { location: "Kochi, Kakkanad", price: "₹55,00,000", img: "src/images/bg-hero-estateease.jpg" },
-    { location: "Chennai, OMR", price: "₹65,00,000", img: "src/images/bg-hero-estateease.jpg" },
-    { location: "Mumbai, Bandra", price: "₹85,00,000", img: "src/images/bg-hero-estateease.jpg" },
-    { location: "Delhi, Dwarka", price: "₹75,00,000", img: "src/images/bg-hero-estateease.jpg" },
-    { location: "Hyderabad, Gachibowli", price: "₹60,00,000", img: "src/images/bg-hero-estateease.jpg" },
-  
+    {
+      location: "Bengaluru, Indiranagar",
+      price: "₹45,00,000",
+      img: "src/images/bg-hero-estateease.jpg",
+    },
+    {
+      location: "Kochi, Kakkanad",
+      price: "₹55,00,000",
+      img: "src/images/bg-hero-estateease.jpg",
+    },
+    {
+      location: "Chennai, OMR",
+      price: "₹65,00,000",
+      img: "src/images/bg-hero-estateease.jpg",
+    },
+    {
+      location: "Mumbai, Bandra",
+      price: "₹85,00,000",
+      img: "src/images/bg-hero-estateease.jpg",
+    },
+    {
+      location: "Delhi, Dwarka",
+      price: "₹75,00,000",
+      img: "src/images/bg-hero-estateease.jpg",
+    },
+    {
+      location: "Hyderabad, Gachibowli",
+      price: "₹60,00,000",
+      img: "src/images/bg-hero-estateease.jpg",
+    },
   ];
 
   return (
@@ -33,9 +57,11 @@ function PropertyGrid() {
               <p>{property.location}</p>
               <p className="font-semibold text-blue-600">{property.price}</p>
             </div>
-            <button className="w-full py-2 mt-2 rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-semibold hover:from-indigo-500 hover:to-blue-500 transition">
-              View Details
-            </button>
+            <Link to="/property">
+              <button className="w-full py-2 mt-2 rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-semibold hover:from-indigo-500 hover:to-blue-500 transition">
+                View Details
+              </button>
+            </Link>
           </div>
         </div>
       ))}
