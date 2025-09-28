@@ -2,7 +2,7 @@ import React from 'react';
 
 function Hero() {
   return (
-    <div className="relative w-full h-[31rem]">
+    <div className="relative w-full h-[20rem]">
       <div className="absolute inset-0 bg-[#f2f2f2]"></div>
 
       <div className="relative flex flex-col items-center justify-center h-full px-4">

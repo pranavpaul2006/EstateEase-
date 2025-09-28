@@ -9,7 +9,7 @@ function Home() {
     <div className="pt-20">
       <Hero />
       <PropertyGrid />
-      <Footer/>
+      {/* <Footer/> */}
     </div>
   );
 }
