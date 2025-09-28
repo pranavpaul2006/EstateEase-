@@ -76,7 +76,7 @@ const Property = () => {
         </div>
 
         {/* --- BOTTOM SECTION: Description and Appointment --- */}
-        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-gray-200">
+        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-gray-300">
           {/* Description */}
           <div>
             <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3">
@@ -88,7 +88,7 @@ const Property = () => {
           </div>
 
           {/* Appointment Section */}
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-100">
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-300">
             <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">
               Schedule a Visit
             </h3>
