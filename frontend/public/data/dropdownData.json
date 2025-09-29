@@ -1,0 +1,18 @@
+{
+  "cities": [
+    { "value": "kochi", "label": "Kochi" },
+    { "value": "varkala", "label": "Varkala" },
+    { "value": "munnar", "label": "Munnar" },
+    { "value": "kottayam", "label": "Kottayam" },
+    { "value": "palakkad", "label": "Palakkad" },
+    { "value": "thiruvananthapuram", "label": "Thiruvananthapuram" },
+    { "value": "alappuzha", "label": "Alappuzha" }
+  ],
+  "propertyTypes": [
+    { "value": "villa", "label": "Villa" },
+    { "value": "apartment", "label": "Apartment" },
+    { "value": "bungalow", "label": "Bungalow" },
+    { "value": "house", "label": "House" },
+    { "value": "farmhouse", "label": "Farmhouse" }
+  ]
+}

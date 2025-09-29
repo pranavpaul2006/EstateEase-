@@ -1,23 +1,19 @@
-// src/components/navbar.jsx
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../images/estateease-logo.png";
 
-// Accept the onLoginClick prop
 function Navbar({ onLoginClick }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-[#52ab98] fixed w-full z-20 shadow-md">
+    <nav className="bg-[#52ab98] fixed w-full z-50 shadow-md">
       <div className="px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* ... (Logo code remains the same) ... */}
+        {/* Logo */}
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center">
             <img
-              src={logo}
+              src="/images/estateease-logo.png"
               alt="EstateEase"
-              className="h-24 w-24 object-contain flex-shrink-0"
+              className="h-16 w-16 object-contain flex-shrink-0"
             />
             <span className="ml-2 font-bold text-2xl text-white select-none">
               EstateEase
@@ -25,117 +21,87 @@ function Navbar({ onLoginClick }) {
           </Link>
         </div>
 
-        <div className="flex items-center">
-          <div className="hidden md:flex items-center gap-6">
-            {/* ... (Other links remain the same) ... */}
-            <a
-              href="#"
-              className="text-white hover:text-gray-200 font-semibold"
-            >
-              BUY
-            </a>
-            <a
-              href="#"
-              className="text-white hover:text-gray-200 font-semibold"
-            >
-              RENT
-            </a>
-            <a
-              href="#"
-              className="text-white hover:text-gray-200 font-semibold"
-            >
-              SELL
-            </a>
-            <Link to="/cart">
-              <button className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100">
-                WISH
-              </button>
-            </Link>
-
-            {/* CHANGE THIS: From a <Link> to a <button> with an onClick handler */}
-            <button
-              onClick={onLoginClick}
-              className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100"
-            >
-              LOGIN
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-6">
+          <a href="#" className="text-white hover:text-gray-200 font-semibold">
+            BUY
+          </a>
+          <a href="#" className="text-white hover:text-gray-200 font-semibold">
+            RENT
+          </a>
+          <a href="#" className="text-white hover:text-gray-200 font-semibold">
+            SELL
+          </a>
+          <Link to="/cart">
+            <button className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100">
+              WISH
             </button>
-          </div>
+          </Link>
+          <button
+            onClick={onLoginClick}
+            className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100"
+          >
+            LOGIN
+          </button>
+        </div>
 
-          {/* ... (Mobile menu toggle remains the same) ... */}
-          <div className="md:hidden flex items-center ml-4">
-            <button
-              onClick={() => setIsOpen((s) => !s)}
-              aria-expanded={isOpen}
-              aria-label="Toggle navigation"
-              className="focus:outline-none text-white p-2"
-            >
-              <div className="space-y-1">
-                <span
-                  className={`block h-0.5 w-6 bg-white transition-transform duration-300 ${
-                    isOpen ? "rotate-45 translate-y-2" : ""
-                  }`}
-                />
-                <span
-                  className={`block h-0.5 w-6 bg-white transition-opacity duration-300 ${
-                    isOpen ? "opacity-0" : ""
-                  }`}
-                />
-                <span
-                  className={`block h-0.5 w-6 bg-white transition-transform duration-300 ${
-                    isOpen ? "-rotate-45 -translate-y-2" : ""
-                  }`}
-                />
-              </div>
-            </button>
-          </div>
+        {/* Mobile Hamburger */}
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            aria-label="Toggle navigation"
+            className="flex flex-col justify-center items-center w-10 h-10 focus:outline-none gap-1"
+          >
+            <span
+              className={`block h-0.5 w-6 bg-white transition-transform duration-300 ${
+                isOpen ? "rotate-45 translate-y-1.5" : ""
+              }`}
+            />
+            <span
+              className={`block h-0.5 w-6 bg-white transition-opacity duration-300 ${
+                isOpen ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`block h-0.5 w-6 bg-white transition-transform duration-300 ${
+                isOpen ? "-rotate-45 -translate-y-1.5" : ""
+              }`}
+            />
+          </button>
         </div>
       </div>
 
       {/* Mobile Dropdown */}
       <div
-        className={`md:hidden absolute left-0 right-0 top-full bg-[#52ab98] overflow-hidden transition-[max-height] duration-300 ${
+        className={`md:hidden bg-[#52ab98] overflow-hidden transition-[max-height] duration-300 ${
           isOpen ? "max-h-96" : "max-h-0"
         }`}
-        style={{ zIndex: 19 }}
       >
-        <div className="px-4 pb-4 pt-3">
-          {/* ... (Other mobile links remain the same) ... */}
-          <a
-            href="#"
-            className="block py-2 text-white font-semibold hover:text-gray-200"
-          >
+        <div className="px-4 pt-4 pb-6 flex flex-col gap-2">
+          <a href="#" className="block py-2 text-white font-semibold hover:text-gray-200">
             BUY
           </a>
-          <a
-            href="#"
-            className="block py-2 text-white font-semibold hover:text-gray-200"
-          >
+          <a href="#" className="block py-2 text-white font-semibold hover:text-gray-200">
             RENT
           </a>
-          <a
-            href="#"
-            className="block py-2 text-white font-semibold hover:text-gray-200"
-          >
+          <a href="#" className="block py-2 text-white font-semibold hover:text-gray-200">
             SELL
           </a>
-          <div className="mt-3 space-y-2">
-            <Link to="/cart">
-              <button className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
-                WISH
-              </button>
-            </Link>
-
-            {/* CHANGE THIS FOR MOBILE: From a <Link> to a <button> */}
-            <button
-              onClick={() => {
-                onLoginClick();
-                setIsOpen(false);
-              }}
-              className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100"
-            >
-              LOGIN
+          <Link to="/cart">
+            <button className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
+              WISH
             </button>
-          </div>
+          </Link>
+          <button
+            onClick={() => {
+              onLoginClick();
+              setIsOpen(false);
+            }}
+            className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100"
+          >
+            LOGIN
+          </button>
         </div>
       </div>
     </nav>
