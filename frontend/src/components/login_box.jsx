@@ -2,14 +2,24 @@
 
 import React from "react";
 
-function LoginBox() {
-  // REMOVED: The outer full-screen div. The component now only returns the form box.
+// 1. Accept the onLoginSuccess prop
+function LoginBox({ onLoginSuccess }) {
+  // 2. Create a submit handler
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Prevent page refresh
+    // Here you would normally check the email and password
+    // For now, we'll just assume the login is successful
+    console.log("Login form submitted, calling onLoginSuccess...");
+    onLoginSuccess(); // 3. Call the function passed from App.jsx
+  };
+
   return (
     <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
         Login to Your Account
       </h2>
-      <form className="space-y-6">
+      {/* 4. Attach the handler to the form's onSubmit event */}
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
           <label
             htmlFor="email"
@@ -22,6 +32,7 @@ function LoginBox() {
             id="email"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="user mail"
+            required
           />
         </div>
         <div>
@@ -36,6 +47,7 @@ function LoginBox() {
             id="password"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="password"
+            required
           />
         </div>
         <button
@@ -45,12 +57,6 @@ function LoginBox() {
           Login
         </button>
       </form>
-      <p className="mt-4 text-sm text-center text-gray-600">
-        Don&apos;t have an account?{" "}
-        <a href="#" className="text-blue-500 hover:underline">
-          Sign Up
-        </a>
-      </p>
     </div>
   );
 }

@@ -1,7 +1,4 @@
-// src/App.jsx
-
 import React, { useState } from "react";
-// REMOVE "Router" from this import. We only need the other components.
 import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/navbar";
 import Home from "./components/home";
@@ -9,35 +6,37 @@ import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import Property from "./pages/Property";
 import LoginBox from "./components/login_box";
+import UserProfile from "./components/UserProfile";
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const handleLoginClick = () => {
-    setShowLogin(true);
+  const handleLoginClick = () => setShowLogin(true);
+  const handleCloseLogin = () => setShowLogin(false);
+
+  // This function is called by LoginBox on a successful login
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true); // Sets the user's status to logged in
+    setShowLogin(false); // Closes the login modal
   };
 
-  const handleCloseLogin = () => {
-    setShowLogin(false);
-  };
-
-  // REMOVED the <Router> and </Router> tags from here
   return (
     <div>
-      <Navbar onLoginClick={handleLoginClick} />
+      <Navbar onLoginClick={handleLoginClick} isLoggedIn={isLoggedIn} />
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/property/:id" element={<Property />} />
+          <Route path="/profile" element={<UserProfile />} />
         </Routes>
       </main>
 
-      {/* MODAL LOGIC STARTS HERE */}
+      {/* Login Modal */}
       {showLogin && (
-        // THIS IS THE LINE TO CHANGE
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
           <div className="relative">
             <button
               onClick={handleCloseLogin}
@@ -58,7 +57,8 @@ function App() {
                 />
               </svg>
             </button>
-            <LoginBox />
+            {/* Pass the login success function to the LoginBox */}
+            <LoginBox onLoginSuccess={handleLoginSuccess} />
           </div>
         </div>
       )}
