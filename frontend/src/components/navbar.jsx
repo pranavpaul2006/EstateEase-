@@ -35,7 +35,7 @@ function Navbar({ onLoginClick, isLoggedIn }) {
           <Link to="/sell" className="text-white hover:text-gray-200 font-semibold">
             SELL
           </Link>
-          <Link to="/cart">
+          <Link to="/Cart">
             <button className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100">
               WISH
             </button>

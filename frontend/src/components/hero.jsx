@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from "react";
 import PropertyGrid from "./property_grid";
 
-export default function Hero() {
-  const [properties, setProperties] = useState([]);
+export default function Hero({ properties, wishlist, onToggleWishlist }) {
+  // State for dropdowns and filtering is still managed here
   const [dropdownData, setDropdownData] = useState({ cities: [], propertyTypes: [] });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // This effect now only fetches the dropdown data
   useEffect(() => {
-    fetch("/data/properties.json")
-      .then((res) => res.json())
-      .then((data) => setProperties(data.properties));
-
     fetch("/data/dropdownData.json")
       .then((res) => res.json())
       .then((data) => setDropdownData(data));
   }, []);
 
   const handleSearch = () => {
+    // This logic now filters the 'properties' array received from props
     const filtered = properties.filter((prop) => {
       const cityMatch = selectedCity ? prop.location.includes(selectedCity) : true;
       const typeMatch = selectedType ? prop.type === selectedType : true;
@@ -30,7 +28,7 @@ export default function Hero() {
     setHasSearched(true);
   };
 
-  const propertiesToShow = filteredProperties.length > 0 ? filteredProperties : properties;
+  const propertiesToShow = hasSearched ? filteredProperties : properties;
 
   return (
     <div className="w-full">
@@ -96,7 +94,11 @@ export default function Hero() {
             No properties found.
           </p>
         ) : (
-          <PropertyGrid properties={propertiesToShow} />
+          <PropertyGrid
+            properties={propertiesToShow}
+            wishlist={wishlist}
+            onToggleWishlist={onToggleWishlist}
+          />
         )}
       </div>
     </div>

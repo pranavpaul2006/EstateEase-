@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/navbar";
 import Home from "./components/home";
@@ -10,8 +10,18 @@ import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+  // --- State Management ---
   const [showLogin, setShowLogin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [properties, setProperties] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+
+  // --- Data Fetching ---
+  useEffect(() => {
+    fetch("/data/properties.json")
+      .then((res) => res.json())
+      .then((data) => setProperties(data.properties));
+  }, []);
 
   // --- Handlers ---
   const handleLoginClick = () => setShowLogin(true);
@@ -26,15 +36,42 @@ function App() {
     setIsLoggedIn(false);
   };
 
+  const handleToggleWishlist = (propertyId) => {
+    setWishlist((prevWishlist) => {
+      if (prevWishlist.includes(propertyId)) {
+        return prevWishlist.filter((id) => id !== propertyId);
+      } else {
+        return [...prevWishlist, propertyId];
+      }
+    });
+  };
+
   return (
     <div>
       <Navbar onLoginClick={handleLoginClick} isLoggedIn={isLoggedIn} />
       <main>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <Home
+                properties={properties}
+                wishlist={wishlist}
+                onToggleWishlist={handleToggleWishlist}
+              />
+            }
+          />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route
+            path="/cart"
+            element={
+              <Cart
+                wishlistItems={properties.filter((p) => wishlist.includes(p.id))}
+                onToggleWishlist={handleToggleWishlist}
+              />
+            }
+          />
           <Route path="/property/:id" element={<Property />} />
 
           {/* Protected Route */}
