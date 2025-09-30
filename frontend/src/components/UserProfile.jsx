@@ -1,7 +1,6 @@
 import React from "react";
-
+import { useNavigate } from "react-router-dom";
 import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
-
 
 const mockUser = {
   name: "Alex Doe",
@@ -12,10 +11,17 @@ const mockUser = {
   memberSince: "September 2025",
 };
 
-function UserProfile({ user = mockUser }) {
-  const handleLogout = () => {
-    // Implement your logout logic here
-    alert("Logout button clicked!");
+function UserProfile({ user = mockUser, onLogout }) {
+  const navigate = useNavigate();
+
+  const handleLogoutClick = () => {
+    // Ask for confirmation before proceeding
+    if (window.confirm("Are you sure you want to log out?")) {
+      // If the user clicks "OK", run the logout logic
+      onLogout();
+      navigate("/");
+    }
+    // If the user clicks "Cancel", nothing happens.
   };
 
   return (
@@ -40,7 +46,7 @@ function UserProfile({ user = mockUser }) {
                 <span>Edit Profile</span>
               </button>
               <button
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
                 className="w-full flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition"
               >
                 <FiLogOut />
@@ -82,7 +88,6 @@ function UserProfile({ user = mockUser }) {
                 List a Property
               </button>
             </div>
-            {/* When the user has properties, you can map over them here */}
           </div>
         </div>
       </div>

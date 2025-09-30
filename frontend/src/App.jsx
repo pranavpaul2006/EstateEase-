@@ -7,18 +7,23 @@ import Cart from "./pages/Cart";
 import Property from "./pages/Property";
 import LoginBox from "./components/login_box";
 import UserProfile from "./components/UserProfile";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // --- Handlers ---
   const handleLoginClick = () => setShowLogin(true);
   const handleCloseLogin = () => setShowLogin(false);
 
-
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true); 
-    setShowLogin(false); 
+    setIsLoggedIn(true);
+    setShowLogin(false);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
   };
 
   return (
@@ -26,11 +31,21 @@ function App() {
       <Navbar onLoginClick={handleLoginClick} isLoggedIn={isLoggedIn} />
       <main>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/property/:id" element={<Property />} />
-          <Route path="/profile" element={<UserProfile />} />
+
+          {/* Protected Route */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <UserProfile onLogout={handleLogout} />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
 
@@ -57,7 +72,6 @@ function App() {
                 />
               </svg>
             </button>
-            {/* Pass the login success function to the LoginBox */}
             <LoginBox onLoginSuccess={handleLoginSuccess} />
           </div>
         </div>
