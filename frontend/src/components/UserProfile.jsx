@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 import EditProfileModal from "./EditProfileModal";
+import ConfirmationModal from "./ConfirmationModal";
+import Notification from "./Notification";
 
 const mockUser = {
   name: "Alex Doe",
@@ -16,18 +18,24 @@ function UserProfile({ onLogout }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(mockUser);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: "" });
 
   const handleLogoutClick = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
-      onLogout();
-      navigate("/");
-    }
+    setShowLogoutConfirm(true);
+  };
+
+  const handleConfirmLogout = () => {
+    onLogout();
+    navigate("/");
+    setShowLogoutConfirm(false);
   };
 
   const handleSaveProfile = (updatedData) => {
     setUser((prevUser) => ({ ...prevUser, ...updatedData }));
     setIsEditModalOpen(false);
-    alert("Profile updated successfully!");
+    // Use the new notification system instead of alert()
+    setNotification({ show: true, message: "Profile updated successfully!" });
   };
 
   return (
@@ -88,12 +96,27 @@ function UserProfile({ onLogout }) {
         </div>
       </div>
 
-      {/* Conditionally render the modal */}
+      {/* RENDER MODALS AND NOTIFICATIONS */}
       {isEditModalOpen && (
         <EditProfileModal
           user={user}
           onSave={handleSaveProfile}
           onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
+
+      {showLogoutConfirm && (
+        <ConfirmationModal
+          message="Are you sure you want to log out?"
+          onConfirm={handleConfirmLogout}
+          onCancel={() => setShowLogoutConfirm(false)}
+        />
+      )}
+
+      {notification.show && (
+        <Notification
+          message={notification.message}
+          onClose={() => setNotification({ show: false, message: "" })}
         />
       )}
     </>
