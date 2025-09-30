@@ -15,10 +15,10 @@ function App() {
   const handleLoginClick = () => setShowLogin(true);
   const handleCloseLogin = () => setShowLogin(false);
 
-  // This function is called by LoginBox on a successful login
+
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true); // Sets the user's status to logged in
-    setShowLogin(false); // Closes the login modal
+    setIsLoggedIn(true); 
+    setShowLogin(false); 
   };
 
   return (
@@ -36,7 +36,7 @@ function App() {
 
       {/* Login Modal */}
       {showLogin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
           <div className="relative">
             <button
               onClick={handleCloseLogin}

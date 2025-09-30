@@ -2,15 +2,13 @@
 
 import React from "react";
 
-// 1. Accept the onLoginSuccess prop
+
 function LoginBox({ onLoginSuccess }) {
-  // 2. Create a submit handler
+
   const handleSubmit = (event) => {
-    event.preventDefault(); // Prevent page refresh
-    // Here you would normally check the email and password
-    // For now, we'll just assume the login is successful
+    event.preventDefault(); 
     console.log("Login form submitted, calling onLoginSuccess...");
-    onLoginSuccess(); // 3. Call the function passed from App.jsx
+    onLoginSuccess(); 
   };
 
   return (

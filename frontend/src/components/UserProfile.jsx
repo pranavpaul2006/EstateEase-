@@ -1,9 +1,8 @@
 import React from "react";
-// For icons, you can install react-icons by running: npm install react-icons
+
 import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 
-// This is mock data. In your real application, you would pass the
-// logged-in user's data as a prop to this component.
+
 const mockUser = {
   name: "Alex Doe",
   email: "alex.doe@example.com",
