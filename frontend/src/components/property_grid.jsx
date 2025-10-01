@@ -16,7 +16,7 @@ function PropertyGrid({ properties = [], wishlist, onToggleWishlist }) {
             {/* --- WISHLIST ICON BUTTON --- */}
             <button
               onClick={() => onToggleWishlist(property.id)}
-              className="absolute top-3 right-3 z-20 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition"
+              className="absolute top-3 right-3 z-20 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition cursor-pointer"
               aria-label="Add to wishlist"
             >
               <FaHeart

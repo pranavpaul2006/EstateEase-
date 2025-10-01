@@ -36,7 +36,7 @@ function Navbar({ onLoginClick, isLoggedIn }) {
             SELL
           </Link>
           <Link to="/Cart">
-            <button className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100">
+            <button className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer">
               WISH
             </button>
           </Link>
@@ -44,7 +44,7 @@ function Navbar({ onLoginClick, isLoggedIn }) {
           {/* === CONDITIONAL LOGIC FOR DESKTOP === */}
           {isLoggedIn ? (
             <Link to="/profile">
-              <button className="flex items-center gap-2 bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100">
+              <button className="flex items-center gap-2 bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer">
                 <FiUser />
                 <span>MY ACCOUNT</span>
               </button>
@@ -52,7 +52,7 @@ function Navbar({ onLoginClick, isLoggedIn }) {
           ) : (
             <button
               onClick={onLoginClick}
-              className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100"
+              className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer"
             >
               LOGIN
             </button>

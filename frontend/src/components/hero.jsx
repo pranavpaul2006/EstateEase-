@@ -80,7 +80,7 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
 
             <button
               onClick={handleSearch}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 transition"
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600 transition cursor-pointer"
             >
               Search
             </button>
