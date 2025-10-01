@@ -6,11 +6,12 @@ import ConfirmationModal from "./ConfirmationModal";
 import Notification from "./Notification";
 
 const mockUser = {
-  name: "Alex Doe",
-  email: "alex.doe@example.com",
-  phone: "+1 (555) 123-4567",
-  address: "123 Dream Lane, Reality City, RC 12345",
-  profileImageUrl: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+  name: "Lalu Alex",
+  email: "lalualex69@gmail.com",
+  phone: "+91 999 666 9996",
+  address: "69 Karimbara, Kochi",
+  profileImageUrl:
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGfC9PJo1bEymgxVSsY9cdvyme3gfUxyVXlw&s",
   memberSince: "September 2025",
 };
 
@@ -19,7 +20,10 @@ function UserProfile({ onLogout }) {
   const [user, setUser] = useState(mockUser);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [notification, setNotification] = useState({ show: false, message: "" });
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+  });
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
@@ -45,15 +49,27 @@ function UserProfile({ onLogout }) {
           {/* Left Column: Profile Card */}
           <div className="lg:col-span-1">
             <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
-              <img src={user.profileImageUrl} alt="Profile" className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-blue-500 p-1" />
+              <img
+                src={user.profileImageUrl}
+                alt="Profile"
+                className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-blue-500 p-1"
+              />
               <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">Member since {user.memberSince}</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Member since {user.memberSince}
+              </p>
               <div className="mt-6 space-y-3">
-                <button onClick={() => setIsEditModalOpen(true)} className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition cursor-pointer">
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition cursor-pointer"
+                >
                   <FiEdit />
                   <span>Edit Profile</span>
                 </button>
-                <button onClick={handleLogoutClick} className="w-full flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition cursor-pointer">
+                <button
+                  onClick={handleLogoutClick}
+                  className="w-full flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition cursor-pointer"
+                >
                   <FiLogOut />
                   <span>Logout</span>
                 </button>
@@ -64,7 +80,9 @@ function UserProfile({ onLogout }) {
           {/* Right Column: User Details */}
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">Account Details</h3>
+              <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">
+                Account Details
+              </h3>
               <ul className="space-y-5 text-gray-700">
                 <li className="flex items-center text-lg">
                   <FiMail className="mr-4 text-gray-400 text-xl" />
