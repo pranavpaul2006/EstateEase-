@@ -49,11 +49,11 @@ function UserProfile({ onLogout }) {
               <h2 className="text-2xl font-bold text-gray-800">{user.name}</h2>
               <p className="text-sm text-gray-500 mt-1">Member since {user.memberSince}</p>
               <div className="mt-6 space-y-3">
-                <button onClick={() => setIsEditModalOpen(true)} className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition">
+                <button onClick={() => setIsEditModalOpen(true)} className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition cursor-pointer">
                   <FiEdit />
                   <span>Edit Profile</span>
                 </button>
-                <button onClick={handleLogoutClick} className="w-full flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition">
+                <button onClick={handleLogoutClick} className="w-full flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition cursor-pointer">
                   <FiLogOut />
                   <span>Logout</span>
                 </button>
@@ -87,7 +87,7 @@ function UserProfile({ onLogout }) {
               </h3>
               <div className="text-center text-gray-500 py-8">
                 <p>You have not listed any properties yet.</p>
-                <button className="mt-4 bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition">
+                <button className="mt-4 bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition cursor-pointer">
                   List a Property
                 </button>
               </div>

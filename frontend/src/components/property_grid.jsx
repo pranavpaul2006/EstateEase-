@@ -45,7 +45,7 @@ function PropertyGrid({ properties = [], wishlist, onToggleWishlist }) {
                 {property.description}
               </p>
               <Link to={`/property/${property.id}`}>
-                <button className="w-full py-2 mt-2 rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-semibold hover:from-indigo-500 hover:to-blue-500 transition">
+                <button className="w-full py-2 mt-2 rounded-md bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-semibold hover:from-indigo-500 hover:to-blue-500 transition cursor-pointer">
                   View Details
                 </button>
               </Link>
