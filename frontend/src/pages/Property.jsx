@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import ConfirmModal from "./ConfirmModal";
 
 const Property = () => {
   const { id } = useParams(); // Get the property id from URL
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Appointment-related state
+  const [selectedDate, setSelectedDate] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState("idle"); // "idle" | "booked"
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/data/properties.json")
@@ -28,20 +35,54 @@ const Property = () => {
   if (!property)
     return <div className="text-center mt-20">Property not found.</div>;
 
+  // Open modal if date selected, otherwise show error
+  const handleBookClick = () => {
+    setError("");
+    if (!selectedDate) {
+      setError("Please select a date before booking.");
+      return;
+    }
+    setBookingStatus("idle");
+    setShowModal(true);
+  };
+
+  // Confirm booking: mark as booked and persist to localStorage
+  const handleConfirmBooking = () => {
+    setBookingStatus("booked");
+
+    try {
+      const existing = JSON.parse(localStorage.getItem("estateBookings") || "[]");
+      existing.push({
+        propertyId: property.id,
+        title: property.title,
+        date: selectedDate,
+        bookedAt: new Date().toISOString(),
+      });
+      localStorage.setItem("estateBookings", JSON.stringify(existing));
+    } catch (e) {
+      // ignore localStorage errors silently
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setBookingStatus("idle");
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen pt-20 pb-10">
-      <div className="w-full max-w-6xl mx-auto flex flex-col p-4 sm:p-6 lg:p-8">
+      <div className="w-full mx-auto flex flex-col px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-32">
         {/* TOP SECTION: Image + Core Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+        <div className="grid grid-cols-1 pt-12 lg:grid-cols-2 gap-8  lg:gap-12 xl:gap-16">
           <div className="flex items-center justify-center">
             <img
               src={property.img}
               alt={property.title}
-              className="w-full h-64 sm:h-80 md:h-[450px] lg:h-full object-cover rounded-xl shadow-lg"
+              className="w-full h-64 sm:h-60 md:h-[450px] lg:h-[500px] xl:h-[500px] object-cover rounded-xl shadow-lg"
             />
           </div>
 
-          <div className="flex flex-col justify-center space-y-5">
+          <div className="flex flex-col justify-center space-y-6 lg:space-y-8 ">
             <span
               className={`inline-block px-3 py-1 text-sm font-semibold rounded-full w-max ${
                 property.status === "Available"
@@ -56,7 +97,7 @@ const Property = () => {
               {property.title}
             </h1>
 
-            <div className="flex items-center text-gray-600 text-base sm:text-lg">
+            <div className="flex items-center text-gray-600 text-base sm:text-lg lg:text-xl">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 sm:h-6 sm:w-6 mr-2 text-gray-400"
@@ -72,16 +113,16 @@ const Property = () => {
               <span>{property.location}</span>
             </div>
 
-            <div className="flex flex-wrap gap-x-8 gap-y-4 pt-4 text-gray-800">
+            <div className="flex flex-wrap gap-x-10 gap-y-6 pt-4 text-gray-800">
               <div className="flex flex-col">
                 <span className="text-sm text-gray-500">Price</span>
-                <span className="text-2xl sm:text-3xl font-bold text-blue-600">
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600">
                   {property.price}
                 </span>
               </div>
               <div className="flex flex-col">
                 <span className="text-sm text-gray-500">Area</span>
-                <span className="text-2xl sm:text-3xl font-semibold">
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-semibold">
                   {property.area}
                 </span>
               </div>
@@ -90,35 +131,52 @@ const Property = () => {
         </div>
 
         {/* BOTTOM SECTION: Description + Appointment */}
-        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-gray-300">
+        <div className="mt-10 pt-8 border-t border-gray-300">
           {/* Description */}
-          <div>
-            <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3">
-              About this property
-            </h3>
-            <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-              {property.description}
-            </p>
-          </div>
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800 mb-4">
+            About this property
+          </h3>
+          <p className="text-gray-600 leading-relaxed text-sm sm:text-base lg:text-lg max-w-5xl">
+            {property.description}
+          </p>
 
           {/* Appointment Section */}
-          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-300">
-            <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">
+          <div className="mt-10 pt-8 border-t border-gray-300">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800 mb-4">
               Schedule a Visit
             </h3>
             <div className="flex flex-col sm:flex-row gap-4 items-center w-full">
               <input
                 type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setError("");
+                }}
                 min={new Date().toISOString().split("T")[0]}
                 className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               />
-              <button className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:from-indigo-600 hover:to-blue-500 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer">
+              <button
+                onClick={handleBookClick}
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold hover:from-indigo-600 hover:to-blue-500 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5 cursor-pointer"
+              >
                 Book Appointment
               </button>
             </div>
+
+            {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        show={showModal}
+        onClose={closeModal}
+        onConfirm={handleConfirmBooking}
+        bookingStatus={bookingStatus}
+        propertyTitle={property.title}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 };

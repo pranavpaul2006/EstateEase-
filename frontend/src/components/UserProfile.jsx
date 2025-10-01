@@ -99,7 +99,7 @@ function UserProfile({ onLogout }) {
               </ul>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
+            <div className="bg-white p-6 rounded-2xl shadow-lg mt-8 mb-10">
               <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">
                 My Properties
               </h3>
