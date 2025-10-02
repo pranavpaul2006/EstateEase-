@@ -37,7 +37,7 @@ function EditProfileModal({ user, onSave, onClose }) {
 
   return (
     // Modal Backdrop
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
       {/* Modal Content */}
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg relative">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Edit Profile</h2>

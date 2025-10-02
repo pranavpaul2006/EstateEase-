@@ -130,8 +130,7 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
                   <span className="text-gray-500">▼</span>
                 </div>
               </div>
-              {isCitySuggestionsOpen && (
-                // MODIFIED: Added 'text-left' to align dropdown items
+              {isCitySuggestionsOpen && (                
                 <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left">
                   {citySuggestions.map((city) => (
                     <li key={city.value} onClick={() => handleCitySuggestionClick(city)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
@@ -157,8 +156,7 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
                   <span className="text-gray-500">▼</span>
                 </div>
               </div>
-              {isTypeSuggestionsOpen && (
-                // MODIFIED: Added 'text-left' to align dropdown items
+              {isTypeSuggestionsOpen && (                
                 <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left">
                   {typeSuggestions.map((type) => (
                     <li key={type.value} onClick={() => handleTypeSuggestionClick(type)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
