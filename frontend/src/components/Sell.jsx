@@ -6,7 +6,7 @@ const AMENITIES_LIST = [
   "Swimming Pool", "Gym", "Parking", "Garden", "24/7 Security", "Balcony", "Fully Furnished", "Pet Friendly"
 ];
 
-const Sell = () => {
+const Sell = ({ onAddProperty }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     propertyType: "",
@@ -24,7 +24,6 @@ const Sell = () => {
   });
   
   const [dropdownData, setDropdownData] = useState({ propertyTypes: [] });
-  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -72,10 +71,7 @@ const Sell = () => {
     }));
   };
 
-  // --- CORRECTED VALIDATION LOGIC ---
-
-  // This function now ONLY validates the current step (1 or 2) when clicking "Next"
-  const validateCurrentStep = () => {
+  const validateIntermediateStep = () => {
     const newErrors = {};
     if (step === 1) {
       if (!formData.propertyType) newErrors.propertyType = "Please select a property type.";
@@ -84,29 +80,24 @@ const Sell = () => {
     if (step === 2) {
       if (!formData.price || formData.price <= 0) newErrors.price = "Please enter a valid price.";
       if (!formData.area || formData.area <= 0) newErrors.area = "Please enter a valid area.";
-      if (!formData.bedrooms || formData.bedrooms <= 0) newErrors.bedrooms = "Enter a valid number of bedrooms.";
-      if (!formData.bathrooms || formData.bathrooms <= 0) newErrors.bathrooms = "Enter a valid number of bathrooms.";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const nextStep = () => {
-    if (validateCurrentStep()) { // This now calls the correct function
+    if (validateIntermediateStep()) {
       setStep((prev) => prev + 1);
     }
   };
 
   const prevStep = () => {
-    setErrors({}); // Clear errors when going back
+    setErrors({});
     setStep((prev) => prev - 1);
   };
 
-  // The "Submit" button's handler now contains its own separate validation for Step 3
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Validate ONLY Step 3 fields here
     const finalErrors = {};
     if (!formData.ownerName.trim()) finalErrors.ownerName = "Your name is required.";
     if (!formData.ownerEmail || !/\S+@\S+\.\S+/.test(formData.ownerEmail)) finalErrors.ownerEmail = "A valid email is required.";
@@ -114,11 +105,12 @@ const Sell = () => {
     
     setErrors(finalErrors);
 
-    // Only proceed to submit if there are no errors in this final step
     if (Object.keys(finalErrors).length === 0) {
       setIsSubmitting(true);
       setTimeout(() => {
-        console.log("Property Listing Submitted:", formData);
+        if (onAddProperty) {
+            onAddProperty(formData);
+        }
         setIsSubmitting(false);
         setIsSubmitted(true);
       }, 2000);
@@ -130,9 +122,9 @@ const Sell = () => {
       <div className="bg-gray-50 min-h-screen pt-20 flex flex-col items-center justify-center p-4 text-center">
         <div className="bg-white p-10 rounded-2xl shadow-lg max-w-lg w-full">
             <FiCheckCircle className="mx-auto text-green-500 text-7xl mb-5" />
-            <h1 className="text-3xl font-bold text-gray-800 mb-3">Thank You!</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-3">Submission Successful!</h1>
             <p className="text-gray-600 mb-8">
-              Your property listing has been submitted successfully. Our team will review the details and contact you within 24 hours.
+              Your property has been successfully listed on EstateEase.
             </p>
             <Link to="/">
                 <button className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition cursor-pointer">
@@ -147,12 +139,12 @@ const Sell = () => {
   const progressPercentage = ((step - 1) / 2) * 100;
 
   return (
-    <div className="bg-gray-50 min-h-screen pt-28 pb-12 px-4">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden md:grid md:grid-cols-2">
+    <div className="bg-gray-50 min-h-screen pt-28 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden md:grid md:grid-cols-2">
         {/* Left Side: Information */}
-        <div className="bg-gray-800 p-8 md:p-12 text-white flex flex-col justify-center">
+        <div className="bg-[#2b6777] p-8 md:p-12 text-white flex flex-col justify-center">
             <h1 className="text-3xl lg:text-4xl font-bold mb-4 leading-tight">List Your Property with EstateEase</h1>
-            <p className="text-gray-300 leading-relaxed mb-8">
+            <p className="text-gray-200 leading-relaxed mb-8">
                 Provide detailed information and photos to attract the best buyers. Our platform makes selling simple, transparent, and secure.
             </p>
             <div className="mt-4 p-6 bg-gray-700/50 rounded-lg">
@@ -185,13 +177,12 @@ const Sell = () => {
                     <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800"><FiHome /> Basic Information</h2>
                     <div>
                         <label htmlFor="propertyType" className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
-                        <select id="propertyType" name="propertyType" value={formData.propertyType} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.propertyType ? 'border-red-500' : 'border-gray-300'}`}>
+                        <select id="propertyType" name="propertyType" value={formData.propertyType} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="" disabled>Select a property type</option>
                             {dropdownData.propertyTypes.map(type => (
                                 <option key={type.value} value={type.label}>{type.label}</option>
                             ))}
                         </select>
-                        {errors.propertyType && <p className="text-red-500 text-xs mt-1">{errors.propertyType}</p>}
                     </div>
                     <div>
                         <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location / City</label>
@@ -200,7 +191,7 @@ const Sell = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Property Images (Optional, Max 5)</label>
-                        <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors hover:border-blue-500`}>
+                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors hover:border-blue-500 border-gray-300">
                             <div className="space-y-1 text-center">
                                 <FiUploadCloud className="mx-auto h-12 w-12 text-gray-400"/>
                                 <div className="flex text-sm text-gray-600">
@@ -240,16 +231,6 @@ const Sell = () => {
                             <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">Area (sq. ft.)</label>
                             <input type="number" id="area" name="area" value={formData.area} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.area ? 'border-red-500' : 'border-gray-300'}`} />
                             {errors.area && <p className="text-red-500 text-xs mt-1">{errors.area}</p>}
-                        </div>
-                        <div>
-                            <label htmlFor="bedrooms" className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
-                            <input type="number" id="bedrooms" name="bedrooms" value={formData.bedrooms} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.bedrooms ? 'border-red-500' : 'border-gray-300'}`} />
-                            {errors.bedrooms && <p className="text-red-500 text-xs mt-1">{errors.bedrooms}</p>}
-                        </div>
-                        <div>
-                            <label htmlFor="bathrooms" className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-                            <input type="number" id="bathrooms" name="bathrooms" value={formData.bathrooms} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.bathrooms ? 'border-red-500' : 'border-gray-300'}`} />
-                            {errors.bathrooms && <p className="text-red-500 text-xs mt-1">{errors.bathrooms}</p>}
                         </div>
                     </div>
                     <div>

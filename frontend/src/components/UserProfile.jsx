@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin, FiTrash2 } from "react-icons/fi";
 import EditProfileModal from "./EditProfileModal";
 import ConfirmationModal from "./logout_box";
@@ -15,8 +15,8 @@ const mockUser = {
   memberSince: "September 2025",
 };
 
-// Component now accepts the 'onDeleteBooking' prop
-function UserProfile({ onLogout, bookings, onDeleteBooking }) {
+// Component now accepts all necessary props from App.jsx
+function UserProfile({ onLogout, bookings, onDeleteBooking, listedProperties }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(mockUser);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -26,7 +26,6 @@ function UserProfile({ onLogout, bookings, onDeleteBooking }) {
     message: "",
   });
   
-  // State to manage which booking is being considered for deletion
   const [bookingToDelete, setBookingToDelete] = useState(null);
 
   const handleLogoutClick = () => {
@@ -45,11 +44,10 @@ function UserProfile({ onLogout, bookings, onDeleteBooking }) {
     setNotification({ show: true, message: "Profile updated successfully!" });
   };
   
-  // This runs when the user confirms the deletion in the modal
   const handleConfirmDelete = () => {
     if (bookingToDelete) {
       onDeleteBooking(bookingToDelete.id, bookingToDelete.bookingDate);
-      setBookingToDelete(null); // Close the modal
+      setBookingToDelete(null);
     }
   };
 
@@ -145,17 +143,39 @@ function UserProfile({ onLogout, bookings, onDeleteBooking }) {
               )}
             </div>
 
-            {/* My Properties */}
+            {/* My Listed Properties */}
             <div className="bg-white p-6 rounded-2xl shadow-lg mt-8 mb-10">
               <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">
-                My Properties
+                My Listed Properties
               </h3>
-              <div className="text-center text-gray-500 py-8">
-                <p>You have not listed any properties yet.</p>
-                <button className="mt-4 bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition cursor-pointer">
-                  List a Property
-                </button>
-              </div>
+              {listedProperties && listedProperties.length > 0 ? (
+                <div className="space-y-4">
+                  {listedProperties.map((property) => (
+                    <div key={property.id} className="flex items-center gap-4 border-b pb-4 last:border-b-0 last:pb-0">
+                      <img src={property.images[0]?.preview || 'https://via.placeholder.com/150'} alt={property.location} className="w-24 h-20 object-cover rounded-md" />
+                      <div className="flex-grow">
+                        <p className="font-bold text-gray-800">{property.location}</p>
+                        <p className="text-sm text-gray-600">{property.propertyType}</p>
+                        <p className="text-sm font-semibold text-green-600">₹{parseInt(property.price).toLocaleString()}</p>
+                      </div>
+                      <Link to={`/property/${property.id}`}>
+                        <button className="bg-blue-500 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition cursor-pointer">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <p>You have not listed any properties yet.</p>
+                  <Link to="/sell">
+                    <button className="mt-4 bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition cursor-pointer">
+                      List a Property
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -169,7 +189,6 @@ function UserProfile({ onLogout, bookings, onDeleteBooking }) {
           onClose={() => setIsEditModalOpen(false)}
         />
       )}
-
       {showLogoutConfirm && (
         <ConfirmationModal
           message="Are you sure you want to log out?"
@@ -177,8 +196,6 @@ function UserProfile({ onLogout, bookings, onDeleteBooking }) {
           onCancel={() => setShowLogoutConfirm(false)}
         />
       )}
-
-      {/* Confirmation modal for deleting a booking */}
       {bookingToDelete && (
         <ConfirmationModal
           message={`Are you sure you want to delete the booking for ${bookingToDelete.location}?`}
@@ -186,7 +203,6 @@ function UserProfile({ onLogout, bookings, onDeleteBooking }) {
           onCancel={() => setBookingToDelete(null)}
         />
       )}
-
       {notification.show && (
         <Notification
           message={notification.message}

@@ -21,6 +21,7 @@ function App() {
   const [properties, setProperties] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [listedProperties, setListedProperties] = useState([]);
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -30,30 +31,30 @@ function App() {
       .then((data) => setProperties(data.properties));
   }, []);
 
-  // This effect loads/clears bookings based on login status
+  // This effect loads/clears user-specific data based on login status
   useEffect(() => {
     if (isLoggedIn) {
-      const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
-      const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      const bookingStorageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
+      const storedBookings = JSON.parse(localStorage.getItem(bookingStorageKey) || "[]");
       setBookings(storedBookings);
+
+      const listingStorageKey = `estateListings_${MOCK_CURRENT_USER.id}`;
+      const storedListings = JSON.parse(localStorage.getItem(listingStorageKey) || "[]");
+      setListedProperties(storedListings);
     } else {
-      // If user is logged out, clear the bookings list
       setBookings([]);
+      setListedProperties([]);
     }
   }, [isLoggedIn]);
 
   // --- Handlers ---
   const handleLoginClick = () => setShowLogin(true);
   const handleCloseLogin = () => setShowLogin(false);
-
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
     setShowLogin(false);
   };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
+  const handleLogout = () => setIsLoggedIn(false);
 
   const handleToggleWishlist = (propertyId) => {
     setWishlist((prevWishlist) => {
@@ -68,23 +69,38 @@ function App() {
   const refreshBookings = () => {
     if (isLoggedIn) {
       const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
-      const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
-      setBookings(storedBookings);
+      setBookings(JSON.parse(localStorage.getItem(storageKey) || "[]"));
     }
   };
 
   const handleDeleteBooking = (propertyId, bookingDate) => {
     if (!isLoggedIn) return;
-
     const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
     const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
-    
     const updatedBookings = storedBookings.filter(
-      booking => !(booking.propertyId === propertyId && booking.date === bookingDate)
+      b => !(b.propertyId === propertyId && b.date === bookingDate)
     );
-
     localStorage.setItem(storageKey, JSON.stringify(updatedBookings));
     refreshBookings();
+  };
+  
+  const refreshListedProperties = () => {
+    if (isLoggedIn) {
+      const storageKey = `estateListings_${MOCK_CURRENT_USER.id}`;
+      setListedProperties(JSON.parse(localStorage.getItem(storageKey) || "[]"));
+    }
+  };
+
+  const handleAddProperty = (formData) => {
+    if (!isLoggedIn) return;
+    const storageKey = `estateListings_${MOCK_CURRENT_USER.id}`;
+    const existing = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    const newProperty = { 
+      id: Date.now(), // Use timestamp for a unique ID
+      ...formData 
+    };
+    localStorage.setItem(storageKey, JSON.stringify([...existing, newProperty]));
+    refreshListedProperties();
   };
 
   return (
@@ -93,46 +109,12 @@ function App() {
       <main>
         <Routes>
           {/* Public Routes */}
-          <Route
-            path="/"
-            element={
-              <Home
-                properties={properties}
-                wishlist={wishlist}
-                onToggleWishlist={handleToggleWishlist}
-              />
-            }
-          />
+          <Route path="/" element={ <Home properties={properties} wishlist={wishlist} onToggleWishlist={handleToggleWishlist} /> } />
           <Route path="/contact" element={<Contact />} />
-          <Route
-            path="/buy"
-            element={
-              <Buy
-                wishlist={wishlist}
-                onToggleWishlist={handleToggleWishlist}
-              />
-            }
-          />
-          <Route path="/sell" element={<Sell />} />
-          <Route
-            path="/cart"
-            element={
-              <Cart
-                wishlistItems={properties.filter((p) => wishlist.includes(p.id))}
-                onToggleWishlist={handleToggleWishlist}
-              />
-            }
-          />
-          <Route
-            path="/property/:id"
-            element={
-              <Property
-                properties={properties}
-                onBookProperty={refreshBookings}
-                currentUser={isLoggedIn ? MOCK_CURRENT_USER : null}
-              />
-            }
-          />
+          <Route path="/buy" element={ <Buy wishlist={wishlist} onToggleWishlist={handleToggleWishlist} /> } />
+          <Route path="/sell" element={<Sell onAddProperty={handleAddProperty} />} />
+          <Route path="/cart" element={ <Cart wishlistItems={properties.filter((p) => wishlist.includes(p.id))} onToggleWishlist={handleToggleWishlist} /> } />
+          <Route path="/property/:id" element={ <Property properties={properties} onBookProperty={refreshBookings} currentUser={isLoggedIn ? MOCK_CURRENT_USER : null} /> } />
 
           {/* Protected Route */}
           <Route
@@ -146,6 +128,7 @@ function App() {
                     return { ...property, bookingDate: booking.date };
                   }).filter(Boolean)}
                   onDeleteBooking={handleDeleteBooking}
+                  listedProperties={listedProperties}
                 />
               </ProtectedRoute>
             }
@@ -157,23 +140,9 @@ function App() {
       {showLogin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
           <div className="relative">
-            <button
-              onClick={handleCloseLogin}
-              className="absolute -top-2 -right-2 z-10 bg-white rounded-full p-1 text-gray-700 hover:text-black"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+            <button onClick={handleCloseLogin} className="absolute -top-2 -right-2 z-10 bg-white rounded-full p-1 text-gray-700 hover:text-black">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
             <LoginBox onLoginSuccess={handleLoginSuccess} />
