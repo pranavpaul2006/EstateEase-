@@ -2,11 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
 
-function PropertyGrid({ properties = [], wishlist, onToggleWishlist }) {
+function PropertyGrid({ properties = [], wishlist = [], onToggleWishlist }) {
+  // Filter only featured properties and take the first 6
+  const topProperties = properties
+    .filter((p) => p.featured)
+    .slice(0, 6);
+
   return (
     <div className="mb-12 mt-8 px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {properties.map((property) => {
-        const isWishlisted = wishlist.includes(property.id);
+      {topProperties.map((property) => {
+        const isWishlisted = Array.isArray(wishlist)
+          ? wishlist.includes(property.id)
+          : false;
 
         return (
           <div
@@ -20,16 +27,18 @@ function PropertyGrid({ properties = [], wishlist, onToggleWishlist }) {
               aria-label="Add to wishlist"
             >
               <FaHeart
-                className={`text-xl transition ${
-                  isWishlisted ? "text-red-500" : "text-gray-400"
-                }`}
+                className={`text-xl transition ${isWishlisted ? "text-red-500" : "text-gray-400"}`}
               />
             </button>
             {/* --- END ICON --- */}
 
             {/* Image */}
             <div className="h-52 w-full overflow-hidden">
-              <img src={property.img} alt="Property" className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              <img
+                src={property.img}
+                alt={property.title || "Property"}
+                className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
             </div>
 
             {/* Info */}
