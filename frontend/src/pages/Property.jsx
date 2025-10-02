@@ -79,7 +79,7 @@ const Property = ({ properties, onBookProperty, currentUser }) => {
           {/* TOP SECTION: Image + Core Details */}
           <div className="grid grid-cols-1 pt-12 lg:grid-cols-2 gap-8  lg:gap-12 xl:gap-16">
             <div className="flex items-center justify-center">
-              <img src={property.img} alt={property.title} className="w-full h-64 sm:h-60 md:h-[450px] lg:h-[500px] xl:h-[500px] object-cover rounded-xl shadow-lg" />
+              <img src={property.img} alt={property.title} className="w-full h-64 sm:h-60 md:h-[450px] lg:h-[500px] xl:h-[400px] object-cover rounded-xl shadow-lg" />
             </div>
 
             <div className="flex flex-col justify-center space-y-6 lg:space-y-8 ">

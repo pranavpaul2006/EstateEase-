@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PropertyGrid from "./property_grid";
 
 export default function Hero({ properties, wishlist, onToggleWishlist }) {
+  const navigate = useNavigate();
   const [dropdownData, setDropdownData] = useState({ cities: [], propertyTypes: [] });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedType, setSelectedType] = useState("");
@@ -12,14 +13,7 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
   const [isCitySuggestionsOpen, setIsCitySuggestionsOpen] = useState(false);
   const [isTypeSuggestionsOpen, setIsTypeSuggestionsOpen] = useState(false);
 
-  // Randomized 6 properties only once on mount
   const [randomProperties, setRandomProperties] = useState([]);
-
-  useEffect(() => {
-    const shuffled = [...properties].sort(() => 0.5 - Math.random());
-    setRandomProperties(shuffled.slice(0, 6));
-  }, [properties]);
-
   const citySearchRef = useRef(null);
   const typeSearchRef = useRef(null);
 
@@ -28,6 +22,11 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
       .then((res) => res.json())
       .then((data) => setDropdownData(data));
   }, []);
+
+  useEffect(() => {
+    const shuffled = [...properties].sort(() => 0.5 - Math.random());
+    setRandomProperties(shuffled.slice(0, 6));
+  }, [properties]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -42,7 +41,7 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- Handlers for City ---
+  // --- Handlers for City & Type (unchanged) ---
   const handleCityChange = (e) => {
     const value = e.target.value;
     setSelectedCity(value);
@@ -67,7 +66,6 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
     setIsCitySuggestionsOpen(!isCitySuggestionsOpen);
   };
 
-  // --- Handlers for Property Type ---
   const handleTypeChange = (e) => {
     const value = e.target.value;
     setSelectedType(value);
@@ -92,10 +90,12 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
     setIsTypeSuggestionsOpen(!isTypeSuggestionsOpen);
   };
 
-  // --- Search button now does nothing to properties ---
+  // --- Only change: Search button navigates to /buy ---
   const handleSearch = () => {
-    // Optional: you can show a toast or console log, but PropertyGrid remains unaffected
-    console.log("Search clicked! Inputs are UI only.");
+    const query = new URLSearchParams();
+    if (selectedCity) query.append("city", selectedCity);
+    if (selectedType) query.append("type", selectedType);
+    navigate(`/buy?${query.toString()}`);
   };
 
   return (

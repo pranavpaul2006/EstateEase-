@@ -8,6 +8,7 @@ import Property from "./pages/Property";
 import LoginBox from "./components/login_box";
 import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Buy from "./components/buy"; // Added Buy page
 
 // Define a mock user to represent the person who is logged in.
 const MOCK_CURRENT_USER = { id: "user123", name: "Alex Doe" };
@@ -41,10 +42,9 @@ function App() {
   const handleLoginClick = () => setShowLogin(true);
   const handleCloseLogin = () => setShowLogin(false);
 
-  // THIS FUNCTION IS NOW CORRECTED
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    setShowLogin(false); // This line closes the modal
+    setShowLogin(false);
   };
 
   const handleLogout = () => {
@@ -60,7 +60,7 @@ function App() {
       }
     });
   };
-  
+
   const refreshBookings = () => {
     if (isLoggedIn) {
       const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
@@ -102,6 +102,17 @@ function App() {
                 properties={properties}
                 onBookProperty={refreshBookings}
                 currentUser={isLoggedIn ? MOCK_CURRENT_USER : null}
+              />
+            }
+          />
+
+          {/* Buy Page */}
+          <Route
+            path="/buy"
+            element={
+              <Buy
+                wishlist={wishlist}
+                onToggleWishlist={handleToggleWishlist}
               />
             }
           />
