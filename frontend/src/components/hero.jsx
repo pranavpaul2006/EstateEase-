@@ -2,22 +2,23 @@ import React, { useState, useEffect, useRef } from "react";
 import PropertyGrid from "./property_grid";
 
 export default function Hero({ properties, wishlist, onToggleWishlist }) {
-  // --- State for dropdown data and search filters ---
   const [dropdownData, setDropdownData] = useState({ cities: [], propertyTypes: [] });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  
-  // --- State for autocomplete suggestions ---
+
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [typeSuggestions, setTypeSuggestions] = useState([]);
   const [isCitySuggestionsOpen, setIsCitySuggestionsOpen] = useState(false);
   const [isTypeSuggestionsOpen, setIsTypeSuggestionsOpen] = useState(false);
 
-  // --- State for final search ---
-  const [filteredProperties, setFilteredProperties] = useState([]);
-  const [hasSearched, setHasSearched] = useState(false);
+  // Randomized 6 properties only once on mount
+  const [randomProperties, setRandomProperties] = useState([]);
 
-  // Ref for closing dropdowns when clicking outside
+  useEffect(() => {
+    const shuffled = [...properties].sort(() => 0.5 - Math.random());
+    setRandomProperties(shuffled.slice(0, 6));
+  }, [properties]);
+
   const citySearchRef = useRef(null);
   const typeSearchRef = useRef(null);
 
@@ -40,17 +41,17 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- Handlers for City Autocomplete ---
+  // --- Handlers for City ---
   const handleCityChange = (e) => {
     const value = e.target.value;
     setSelectedCity(value);
     if (value) {
-      const filtered = dropdownData.cities.filter(city => 
+      const filtered = dropdownData.cities.filter(city =>
         city.label.toLowerCase().includes(value.toLowerCase())
       );
       setCitySuggestions(filtered);
     } else {
-      setCitySuggestions(dropdownData.cities); // Show all if input is empty but focused
+      setCitySuggestions(dropdownData.cities);
     }
     setIsCitySuggestionsOpen(true);
   };
@@ -61,18 +62,16 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
   };
 
   const handleCityArrowClick = () => {
-    if (!isCitySuggestionsOpen) {
-      setCitySuggestions(dropdownData.cities);
-    }
+    if (!isCitySuggestionsOpen) setCitySuggestions(dropdownData.cities);
     setIsCitySuggestionsOpen(!isCitySuggestionsOpen);
   };
 
-  // --- Handlers for Property Type Autocomplete ---
+  // --- Handlers for Property Type ---
   const handleTypeChange = (e) => {
     const value = e.target.value;
     setSelectedType(value);
     if (value) {
-      const filtered = dropdownData.propertyTypes.filter(type => 
+      const filtered = dropdownData.propertyTypes.filter(type =>
         type.label.toLowerCase().includes(value.toLowerCase())
       );
       setTypeSuggestions(filtered);
@@ -88,23 +87,15 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
   };
 
   const handleTypeArrowClick = () => {
-    if (!isTypeSuggestionsOpen) {
-      setTypeSuggestions(dropdownData.propertyTypes);
-    }
+    if (!isTypeSuggestionsOpen) setTypeSuggestions(dropdownData.propertyTypes);
     setIsTypeSuggestionsOpen(!isTypeSuggestionsOpen);
   };
 
+  // --- Search button now does nothing to properties ---
   const handleSearch = () => {
-    const filtered = properties.filter((prop) => {
-      const cityMatch = selectedCity ? prop.location.includes(selectedCity) : true;
-      const typeMatch = selectedType ? prop.type === selectedType : true;
-      return cityMatch && typeMatch;
-    });
-    setFilteredProperties(filtered);
-    setHasSearched(true);
+    // Optional: you can show a toast or console log, but PropertyGrid remains unaffected
+    console.log("Search clicked! Inputs are UI only.");
   };
-
-  const propertiesToShow = hasSearched ? filteredProperties : properties;
 
   return (
     <div className="w-full">
@@ -114,8 +105,7 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
           <p className="text-black/80 mb-6 max-w-2xl">Search from thousands of properties across your favorite cities</p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 w-full max-w-4xl">
-            
-            {/* --- LOCATION COMBOBOX (INPUT + DROPDOWN) --- */}
+            {/* City ComboBox */}
             <div ref={citySearchRef} className="relative w-60 md:w-80">
               <div className="flex items-center justify-between bg-white rounded-lg shadow-md px-4 py-2 w-full">
                 <input
@@ -131,18 +121,21 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
                 </div>
               </div>
               {isCitySuggestionsOpen && (
-                // MODIFIED: Added 'text-left' to align dropdown items
-                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left">
-                  {citySuggestions.map((city) => (
-                    <li key={city.value} onClick={() => handleCitySuggestionClick(city)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                      {city.label}
-                    </li>
-                  ))}
+                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left scrollbar-none">
+                  {citySuggestions.length > 0 ? (
+                    citySuggestions.map((city) => (
+                      <li key={city.value} onClick={() => handleCitySuggestionClick(city)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        {city.label}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-400 cursor-default">Not available</li>
+                  )}
                 </ul>
               )}
             </div>
 
-            {/* --- PROPERTY TYPE COMBOBOX (INPUT + DROPDOWN) --- */}
+            {/* Property Type ComboBox */}
             <div ref={typeSearchRef} className="relative w-40 md:w-60">
               <div className="flex items-center justify-between bg-white rounded-lg shadow-md px-4 py-2 w-full">
                 <input
@@ -158,13 +151,16 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
                 </div>
               </div>
               {isTypeSuggestionsOpen && (
-                // MODIFIED: Added 'text-left' to align dropdown items
-                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left">
-                  {typeSuggestions.map((type) => (
-                    <li key={type.value} onClick={() => handleTypeSuggestionClick(type)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                      {type.label}
-                    </li>
-                  ))}
+                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left scrollbar-none">
+                  {typeSuggestions.length > 0 ? (
+                    typeSuggestions.map((type) => (
+                      <li key={type.value} onClick={() => handleTypeSuggestionClick(type)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                        {type.label}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-400 cursor-default">Not available</li>
+                  )}
                 </ul>
               )}
             </div>
@@ -180,15 +176,11 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
       </div>
 
       <div className="px-4">
-        {hasSearched && filteredProperties.length === 0 ? (
-          <p className="text-center mt-12 text-gray-600">No properties found.</p>
-        ) : (
-          <PropertyGrid
-            properties={propertiesToShow}
-            wishlist={wishlist}
-            onToggleWishlist={onToggleWishlist}
-          />
-        )}
+        <PropertyGrid
+          properties={randomProperties}
+          wishlist={wishlist}
+          onToggleWishlist={onToggleWishlist}
+        />
       </div>
     </div>
   );

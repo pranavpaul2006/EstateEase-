@@ -3,14 +3,9 @@ import { Link } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
 
 function PropertyGrid({ properties = [], wishlist = [], onToggleWishlist }) {
-  // Filter only featured properties and take the first 6
-  const topProperties = properties
-    .filter((p) => p.featured)
-    .slice(0, 6);
-
   return (
     <div className="mb-12 mt-8 px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {topProperties.map((property) => {
+      {properties.map((property) => {
         const isWishlisted = Array.isArray(wishlist)
           ? wishlist.includes(property.id)
           : false;
@@ -20,7 +15,7 @@ function PropertyGrid({ properties = [], wishlist = [], onToggleWishlist }) {
             key={property.id}
             className="relative border rounded-xl shadow-lg overflow-hidden group transform transition duration-300 hover:scale-105 hover:shadow-2xl"
           >
-            {/* --- WISHLIST ICON BUTTON --- */}
+            {/* Wishlist Button */}
             <button
               onClick={() => onToggleWishlist(property.id)}
               className="absolute top-3 right-3 z-20 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition cursor-pointer"
@@ -30,7 +25,6 @@ function PropertyGrid({ properties = [], wishlist = [], onToggleWishlist }) {
                 className={`text-xl transition ${isWishlisted ? "text-red-500" : "text-gray-400"}`}
               />
             </button>
-            {/* --- END ICON --- */}
 
             {/* Image */}
             <div className="h-52 w-full overflow-hidden">
