@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 import EditProfileModal from "./EditProfileModal";
-import ConfirmationModal from "./ConfirmationModal";
+import ConfirmationModal from "./logout_box"; 
 import Notification from "./Notification";
 
 const mockUser = {
@@ -15,7 +15,8 @@ const mockUser = {
   memberSince: "September 2025",
 };
 
-function UserProfile({ onLogout }) {
+// Component now accepts the 'bookings' prop from App.jsx
+function UserProfile({ onLogout, bookings }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(mockUser);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -38,7 +39,6 @@ function UserProfile({ onLogout }) {
   const handleSaveProfile = (updatedData) => {
     setUser((prevUser) => ({ ...prevUser, ...updatedData }));
     setIsEditModalOpen(false);
-    // Use the new notification system instead of alert()
     setNotification({ show: true, message: "Profile updated successfully!" });
   };
 
@@ -99,6 +99,35 @@ function UserProfile({ onLogout }) {
               </ul>
             </div>
 
+            {/* Booking History */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
+              <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">
+                Booking History
+              </h3>
+              {bookings && bookings.length > 0 ? (
+                <div className="space-y-4">
+                  {bookings.map((booking) => (
+                    <div key={`${booking.id}-${booking.bookingDate}`} className="flex items-center gap-4 border-b pb-4 last:border-b-0 last:pb-0">
+                      <img src={booking.img} alt={booking.location} className="w-24 h-20 object-cover rounded-md" />
+                      <div className="flex-grow">
+                        <p className="font-bold text-gray-800">{booking.location}</p>
+                        <p className="text-sm text-gray-600">{booking.type}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-700">Booked for:</p>
+                        <p className="text-sm text-blue-600">{booking.bookingDate}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <p>You have no booking history yet.</p>
+                </div>
+              )}
+            </div>
+
+            {/* My Properties */}
             <div className="bg-white p-6 rounded-2xl shadow-lg mt-8 mb-10">
               <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">
                 My Properties

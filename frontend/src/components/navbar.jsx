@@ -1,11 +1,18 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiUser, FiMenu, FiX } from "react-icons/fi";
 
 function Navbar({ onLoginClick, isLoggedIn }) {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  // Reload only Hero/home component
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    navigate("/", { replace: true });
+  };
 
   return (
     <nav className="bg-[#52ab98] fixed w-full z-50 shadow-md">
@@ -15,7 +22,7 @@ function Navbar({ onLoginClick, isLoggedIn }) {
           <a
             href="/"
             className="flex items-center"
-            onClick={() => window.location.reload()}
+            onClick={handleLogoClick}
           >
             <img
               src="/images/estateease-logo.png"

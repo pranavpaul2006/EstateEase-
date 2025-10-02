@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import PropertyGrid from "./property_grid";
 
 export default function Hero({ properties, wishlist, onToggleWishlist }) {

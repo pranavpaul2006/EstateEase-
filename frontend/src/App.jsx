@@ -9,12 +9,16 @@ import LoginBox from "./components/login_box";
 import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Define a mock user to represent the person who is logged in.
+const MOCK_CURRENT_USER = { id: "user123", name: "Alex Doe" };
+
 function App() {
   // --- State Management ---
   const [showLogin, setShowLogin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [properties, setProperties] = useState([]);
   const [wishlist, setWishlist] = useState([]);
+  const [bookings, setBookings] = useState([]);
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -23,13 +27,24 @@ function App() {
       .then((data) => setProperties(data.properties));
   }, []);
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
+      const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      setBookings(storedBookings);
+    } else {
+      setBookings([]);
+    }
+  }, [isLoggedIn]);
+
   // --- Handlers ---
   const handleLoginClick = () => setShowLogin(true);
   const handleCloseLogin = () => setShowLogin(false);
 
+  // THIS FUNCTION IS NOW CORRECTED
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    setShowLogin(false);
+    setShowLogin(false); // This line closes the modal
   };
 
   const handleLogout = () => {
@@ -44,6 +59,14 @@ function App() {
         return [...prevWishlist, propertyId];
       }
     });
+  };
+  
+  const refreshBookings = () => {
+    if (isLoggedIn) {
+      const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
+      const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      setBookings(storedBookings);
+    }
   };
 
   return (
@@ -72,14 +95,29 @@ function App() {
               />
             }
           />
-          <Route path="/property/:id" element={<Property />} />
+          <Route
+            path="/property/:id"
+            element={
+              <Property
+                properties={properties}
+                onBookProperty={refreshBookings}
+                currentUser={isLoggedIn ? MOCK_CURRENT_USER : null}
+              />
+            }
+          />
 
           {/* Protected Route */}
           <Route
             path="/profile"
             element={
               <ProtectedRoute isLoggedIn={isLoggedIn}>
-                <UserProfile onLogout={handleLogout} />
+                <UserProfile
+                  onLogout={handleLogout}
+                  bookings={bookings.map(booking => {
+                    const property = properties.find(p => p.id === booking.propertyId);
+                    return { ...property, bookingDate: booking.date };
+                  }).filter(Boolean)}
+                />
               </ProtectedRoute>
             }
           />
