@@ -178,7 +178,7 @@ export default function Buy({ wishlist, onToggleWishlist }) {
       </aside>
 
       {/* Mobile Filter Button */}
-      <div className="lg:hidden mb-4">
+      <div className="lg:hidden mb-4 pt-10">
         <button
           onClick={() => setMobileFiltersOpen(true)}
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
@@ -203,13 +203,14 @@ export default function Buy({ wishlist, onToggleWishlist }) {
       )}
 
       {/* Property Grid */}
-      <section className="flex-1 ">
-        <PropertyGrid
-          properties={filteredProperties}
-          wishlist={wishlist}
-          onToggleWishlist={onToggleWishlist}
-        />
-      </section>
+      <section className="flex-1 w-full px-4 sm:px-6 md:px-8 lg:px-12  xl:px-16">
+      <PropertyGrid
+        properties={filteredProperties}
+        wishlist={wishlist}
+        onToggleWishlist={onToggleWishlist}
+      />
+       </section>
+
     </div>
   );
 }
