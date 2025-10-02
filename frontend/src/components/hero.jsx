@@ -131,7 +131,8 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
                 </div>
               </div>
               {isCitySuggestionsOpen && (
-                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                // MODIFIED: Added 'text-left' to align dropdown items
+                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left">
                   {citySuggestions.map((city) => (
                     <li key={city.value} onClick={() => handleCitySuggestionClick(city)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       {city.label}
@@ -157,7 +158,8 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
                 </div>
               </div>
               {isTypeSuggestionsOpen && (
-                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                // MODIFIED: Added 'text-left' to align dropdown items
+                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg text-left">
                   {typeSuggestions.map((type) => (
                     <li key={type.value} onClick={() => handleTypeSuggestionClick(type)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                       {type.label}
