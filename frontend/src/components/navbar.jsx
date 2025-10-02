@@ -8,10 +8,10 @@ function Navbar({ onLoginClick, isLoggedIn }) {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Reload only Hero/home component
+  // This function navigates to the homepage without a full page reload
   const handleLogoClick = (e) => {
     e.preventDefault();
-    navigate("/", { replace: true });
+    navigate("/");
   };
 
   return (
@@ -21,8 +21,8 @@ function Navbar({ onLoginClick, isLoggedIn }) {
         <div className="flex items-center gap-4">
           <a
             href="/"
-            className="flex items-center"
             onClick={handleLogoClick}
+            className="flex items-center"
           >
             <img
               src="/images/estateease-logo.png"
@@ -88,22 +88,17 @@ function Navbar({ onLoginClick, isLoggedIn }) {
           isOpen ? "max-h-96" : "max-h-0"
         }`}
       >
-        <div className="px-4 pt-4 pb-6 flex flex-col gap-2">
-          <Link to="/buy" onClick={() => setIsOpen(false)}>
-            <button className="w-full text-white text-left py-2 px-4 rounded-md hover:bg-[#43957e] font-semibold">
-              BUY
-            </button>
+        <div className="px-4 pt-4 pb-6 flex flex-col gap-4">
+          <Link to="/buy" onClick={() => setIsOpen(false)} className="text-white py-2 font-semibold hover:text-gray-200">
+            BUY
           </Link>
-          <Link to="/rent" onClick={() => setIsOpen(false)}>
-            <button className="w-full text-white text-left py-2 px-4 rounded-md hover:bg-[#43957e] font-semibold">
-              RENT
-            </button>
+          <Link to="/rent" onClick={() => setIsOpen(false)} className="text-white py-2 font-semibold hover:text-gray-200">
+            RENT
           </Link>
-          <Link to="/sell" onClick={() => setIsOpen(false)}>
-            <button className="w-full text-white text-left py-2 px-4 rounded-md hover:bg-[#43957e] font-semibold">
-              SELL
-            </button>
+          <Link to="/sell" onClick={() => setIsOpen(false)} className="text-white py-2 font-semibold hover:text-gray-200">
+            SELL
           </Link>
+          <hr className="border-white/20"/>
           <Link to="/cart" onClick={() => setIsOpen(false)}>
             <button className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
               WISH

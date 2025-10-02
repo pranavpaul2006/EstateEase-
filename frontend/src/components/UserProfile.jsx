@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
+import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin, FiTrash2 } from "react-icons/fi";
 import EditProfileModal from "./EditProfileModal";
-import ConfirmationModal from "./logout_box"; 
+import ConfirmationModal from "./logout_box";
 import Notification from "./Notification";
 
 const mockUser = {
@@ -15,8 +15,8 @@ const mockUser = {
   memberSince: "September 2025",
 };
 
-// Component now accepts the 'bookings' prop from App.jsx
-function UserProfile({ onLogout, bookings }) {
+// Component now accepts the 'onDeleteBooking' prop
+function UserProfile({ onLogout, bookings, onDeleteBooking }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(mockUser);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -25,6 +25,9 @@ function UserProfile({ onLogout, bookings }) {
     show: false,
     message: "",
   });
+  
+  // State to manage which booking is being considered for deletion
+  const [bookingToDelete, setBookingToDelete] = useState(null);
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
@@ -40,6 +43,14 @@ function UserProfile({ onLogout, bookings }) {
     setUser((prevUser) => ({ ...prevUser, ...updatedData }));
     setIsEditModalOpen(false);
     setNotification({ show: true, message: "Profile updated successfully!" });
+  };
+  
+  // This runs when the user confirms the deletion in the modal
+  const handleConfirmDelete = () => {
+    if (bookingToDelete) {
+      onDeleteBooking(bookingToDelete.id, bookingToDelete.bookingDate);
+      setBookingToDelete(null); // Close the modal
+    }
   };
 
   return (
@@ -113,10 +124,17 @@ function UserProfile({ onLogout, bookings }) {
                         <p className="font-bold text-gray-800">{booking.location}</p>
                         <p className="text-sm text-gray-600">{booking.type}</p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right mr-4">
                         <p className="font-semibold text-gray-700">Booked for:</p>
                         <p className="text-sm text-blue-600">{booking.bookingDate}</p>
                       </div>
+                      <button 
+                        onClick={() => setBookingToDelete(booking)} 
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition cursor-pointer"
+                        aria-label="Delete booking"
+                      >
+                        <FiTrash2 className="w-5 h-5" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -157,6 +175,15 @@ function UserProfile({ onLogout, bookings }) {
           message="Are you sure you want to log out?"
           onConfirm={handleConfirmLogout}
           onCancel={() => setShowLogoutConfirm(false)}
+        />
+      )}
+
+      {/* Confirmation modal for deleting a booking */}
+      {bookingToDelete && (
+        <ConfirmationModal
+          message={`Are you sure you want to delete the booking for ${bookingToDelete.location}?`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setBookingToDelete(null)}
         />
       )}
 

@@ -8,7 +8,8 @@ import Property from "./pages/Property";
 import LoginBox from "./components/login_box";
 import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Buy from "./components/buy"; // Added Buy page
+import Buy from "./components/buy";
+import Sell from "./components/Sell";
 
 // Define a mock user to represent the person who is logged in.
 const MOCK_CURRENT_USER = { id: "user123", name: "Alex Doe" };
@@ -23,17 +24,20 @@ function App() {
 
   // --- Data Fetching ---
   useEffect(() => {
+    // Fetch all property data once on app load
     fetch("/data/properties.json")
       .then((res) => res.json())
       .then((data) => setProperties(data.properties));
   }, []);
 
+  // This effect loads/clears bookings based on login status
   useEffect(() => {
     if (isLoggedIn) {
       const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
       const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
       setBookings(storedBookings);
     } else {
+      // If user is logged out, clear the bookings list
       setBookings([]);
     }
   }, [isLoggedIn]);
@@ -60,13 +64,27 @@ function App() {
       }
     });
   };
-
+  
   const refreshBookings = () => {
     if (isLoggedIn) {
       const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
       const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
       setBookings(storedBookings);
     }
+  };
+
+  const handleDeleteBooking = (propertyId, bookingDate) => {
+    if (!isLoggedIn) return;
+
+    const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
+    const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    
+    const updatedBookings = storedBookings.filter(
+      booking => !(booking.propertyId === propertyId && booking.date === bookingDate)
+    );
+
+    localStorage.setItem(storageKey, JSON.stringify(updatedBookings));
+    refreshBookings();
   };
 
   return (
@@ -87,6 +105,16 @@ function App() {
           />
           <Route path="/contact" element={<Contact />} />
           <Route
+            path="/buy"
+            element={
+              <Buy
+                wishlist={wishlist}
+                onToggleWishlist={handleToggleWishlist}
+              />
+            }
+          />
+          <Route path="/sell" element={<Sell />} />
+          <Route
             path="/cart"
             element={
               <Cart
@@ -106,17 +134,6 @@ function App() {
             }
           />
 
-          {/* Buy Page */}
-          <Route
-            path="/buy"
-            element={
-              <Buy
-                wishlist={wishlist}
-                onToggleWishlist={handleToggleWishlist}
-              />
-            }
-          />
-
           {/* Protected Route */}
           <Route
             path="/profile"
@@ -128,6 +145,7 @@ function App() {
                     const property = properties.find(p => p.id === booking.propertyId);
                     return { ...property, bookingDate: booking.date };
                   }).filter(Boolean)}
+                  onDeleteBooking={handleDeleteBooking}
                 />
               </ProtectedRoute>
             }
