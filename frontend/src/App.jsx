@@ -10,6 +10,7 @@ import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Buy from "./components/buy";
 import Sell from "./components/Sell";
+import AboutUs from "./components/aboutus"; // <-- NEW
 
 // Define a mock user to represent the person who is logged in.
 const MOCK_CURRENT_USER = { id: "user123", name: "Alex Doe" };
@@ -111,10 +112,46 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={ <Home properties={properties} wishlist={wishlist} onToggleWishlist={handleToggleWishlist} /> } />
           <Route path="/contact" element={<Contact />} />
+<<<<<<< HEAD
           <Route path="/buy" element={ <Buy wishlist={wishlist} onToggleWishlist={handleToggleWishlist} /> } />
           <Route path="/sell" element={<Sell onAddProperty={handleAddProperty} />} />
           <Route path="/cart" element={ <Cart wishlistItems={properties.filter((p) => wishlist.includes(p.id))} onToggleWishlist={handleToggleWishlist} /> } />
           <Route path="/property/:id" element={ <Property properties={properties} onBookProperty={refreshBookings} currentUser={isLoggedIn ? MOCK_CURRENT_USER : null} /> } />
+=======
+          <Route
+            path="/buy"
+            element={
+              <Buy
+                wishlist={wishlist}
+                onToggleWishlist={handleToggleWishlist}
+              />
+            }
+          />
+          <Route path="/sell" element={<Sell />} />
+
+          {/* **About route** */}
+          <Route path="/about" element={<AboutUs />} />
+
+          <Route
+            path="/cart"
+            element={
+              <Cart
+                wishlistItems={properties.filter((p) => wishlist.includes(p.id))}
+                onToggleWishlist={handleToggleWishlist}
+              />
+            }
+          />
+          <Route
+            path="/property/:id"
+            element={
+              <Property
+                properties={properties}
+                onBookProperty={refreshBookings}
+                currentUser={isLoggedIn ? MOCK_CURRENT_USER : null}
+              />
+            }
+          />
+>>>>>>> 6e2102256dd2b580db63dac65e413b1241354b74
 
           {/* Protected Route */}
           <Route
