@@ -112,12 +112,6 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={ <Home properties={properties} wishlist={wishlist} onToggleWishlist={handleToggleWishlist} /> } />
           <Route path="/contact" element={<Contact />} />
-<<<<<<< HEAD
-          <Route path="/buy" element={ <Buy wishlist={wishlist} onToggleWishlist={handleToggleWishlist} /> } />
-          <Route path="/sell" element={<Sell onAddProperty={handleAddProperty} />} />
-          <Route path="/cart" element={ <Cart wishlistItems={properties.filter((p) => wishlist.includes(p.id))} onToggleWishlist={handleToggleWishlist} /> } />
-          <Route path="/property/:id" element={ <Property properties={properties} onBookProperty={refreshBookings} currentUser={isLoggedIn ? MOCK_CURRENT_USER : null} /> } />
-=======
           <Route
             path="/buy"
             element={
@@ -127,9 +121,10 @@ function App() {
               />
             }
           />
-          <Route path="/sell" element={<Sell />} />
+          {/* KEEPING onAddProperty prop for Sell component */}
+          <Route path="/sell" element={<Sell onAddProperty={handleAddProperty} />} />
 
-          {/* **About route** */}
+          {/* New About route */}
           <Route path="/about" element={<AboutUs />} />
 
           <Route
@@ -151,7 +146,6 @@ function App() {
               />
             }
           />
->>>>>>> 6e2102256dd2b580db63dac65e413b1241354b74
 
           {/* Protected Route */}
           <Route
