@@ -1,29 +1,83 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PropertyGrid from "./property_grid";
 
 export default function Hero({ properties, wishlist, onToggleWishlist }) {
-  // State for dropdowns and filtering is still managed here
+  // --- All of your existing state and functions remain the same ---
   const [dropdownData, setDropdownData] = useState({ cities: [], propertyTypes: [] });
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedType, setSelectedType] = useState("");
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [typeSuggestions, setTypeSuggestions] = useState([]);
+  const [isCitySuggestionsOpen, setIsCitySuggestionsOpen] = useState(false);
+  const [isTypeSuggestionsOpen, setIsTypeSuggestionsOpen] = useState(false);
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const citySearchRef = useRef(null);
+  const typeSearchRef = useRef(null);
 
-  // This effect now only fetches the dropdown data
   useEffect(() => {
     fetch("/data/dropdownData.json")
       .then((res) => res.json())
       .then((data) => setDropdownData(data));
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (citySearchRef.current && !citySearchRef.current.contains(event.target)) {
+        setIsCitySuggestionsOpen(false);
+      }
+      if (typeSearchRef.current && !typeSearchRef.current.contains(event.target)) {
+        setIsTypeSuggestionsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleCityChange = (e) => {
+    const value = e.target.value;
+    setSelectedCity(value);
+    if (value) {
+      const filtered = dropdownData.cities.filter(city => 
+        city.label.toLowerCase().includes(value.toLowerCase())
+      );
+      setCitySuggestions(filtered);
+    } else {
+      setCitySuggestions(dropdownData.cities);
+    }
+    setIsCitySuggestionsOpen(true);
+  };
+
+  const handleCitySuggestionClick = (city) => {
+    setSelectedCity(city.label);
+    setIsCitySuggestionsOpen(false);
+  };
+
+  const handleTypeChange = (e) => {
+    const value = e.target.value;
+    setSelectedType(value);
+    if (value) {
+      const filtered = dropdownData.propertyTypes.filter(type => 
+        type.label.toLowerCase().includes(value.toLowerCase())
+      );
+      setTypeSuggestions(filtered);
+    } else {
+      setTypeSuggestions(dropdownData.propertyTypes);
+    }
+    setIsTypeSuggestionsOpen(true);
+  };
+
+  const handleTypeSuggestionClick = (type) => {
+    setSelectedType(type.label);
+    setIsTypeSuggestionsOpen(false);
+  };
+
   const handleSearch = () => {
-    // This logic now filters the 'properties' array received from props
     const filtered = properties.filter((prop) => {
       const cityMatch = selectedCity ? prop.location.includes(selectedCity) : true;
       const typeMatch = selectedType ? prop.type === selectedType : true;
       return cityMatch && typeMatch;
     });
-
     setFilteredProperties(filtered);
     setHasSearched(true);
   };
@@ -32,50 +86,62 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
 
   return (
     <div className="w-full">
-      <div className="relative w-full h-[20rem] flex items-center justify-center bg-[#f2f2f2]">
+      {/* --- THIS IS THE LINE TO CHANGE --- */}
+      <div className="relative w-full h-[20rem] flex items-center justify-center bg-[#f2f2f2] z-30">
         <div className="flex flex-col items-center justify-center px-4 w-full max-w-6xl text-center">
-          <h1 className="text-black text-4xl md:text-5xl font-bold mb-6">
-            Find Your Dream Property
-          </h1>
-          <p className="text-black/80 mb-6 max-w-2xl">
-            Search from thousands of properties across your favorite cities
-          </p>
+          <h1 className="text-black text-4xl md:text-5xl font-bold mb-6">Find Your Dream Property</h1>
+          <p className="text-black/80 mb-6 max-w-2xl">Search from thousands of properties across your favorite cities</p>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 w-full max-w-4xl">
-            <div className="relative flex items-center bg-white rounded-lg shadow-md overflow-hidden w-60 md:w-80">
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="px-4 py-2 w-full focus:outline-none text-gray-700 appearance-none"
-              >
-                <option value="">Enter location or city</option>
-                {dropdownData.cities.map((city) => (
-                  <option key={city.value} value={city.label}>
-                    {city.label}
-                  </option>
-                ))}
-              </select>
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                ▼
-              </span>
+            
+            <div ref={citySearchRef} className="relative w-60 md:w-80">
+              <div className="flex items-center justify-between bg-white rounded-lg shadow-md px-4 py-2 w-full">
+                <input
+                  type="text"
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  onFocus={() => { setCitySuggestions(dropdownData.cities); setIsCitySuggestionsOpen(true); }}
+                  placeholder="Enter location or city"
+                  className="w-full bg-transparent focus:outline-none placeholder-gray-400"
+                />
+                <div onClick={() => setIsCitySuggestionsOpen(!isCitySuggestionsOpen)} className="cursor-pointer">
+                  <span className="text-gray-500">▼</span>
+                </div>
+              </div>
+              {isCitySuggestionsOpen && (
+                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                  {citySuggestions.map((city) => (
+                    <li key={city.value} onClick={() => handleCitySuggestionClick(city)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      {city.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
-            <div className="relative flex items-center bg-white rounded-lg shadow-md overflow-hidden w-40 md:w-60">
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="px-4 py-2 w-full focus:outline-none text-gray-700 appearance-none"
-              >
-                <option value="">Property type</option>
-                {dropdownData.propertyTypes.map((type) => (
-                  <option key={type.value} value={type.label}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                ▼
-              </span>
+            <div ref={typeSearchRef} className="relative w-40 md:w-60">
+              <div className="flex items-center justify-between bg-white rounded-lg shadow-md px-4 py-2 w-full">
+                <input
+                  type="text"
+                  value={selectedType}
+                  onChange={handleTypeChange}
+                  onFocus={() => { setTypeSuggestions(dropdownData.propertyTypes); setIsTypeSuggestionsOpen(true); }}
+                  placeholder="Property type"
+                  className="w-full bg-transparent focus:outline-none placeholder-gray-400"
+                />
+                <div onClick={() => setIsTypeSuggestionsOpen(!isTypeSuggestionsOpen)} className="cursor-pointer">
+                  <span className="text-gray-500">▼</span>
+                </div>
+              </div>
+              {isTypeSuggestionsOpen && (
+                <ul className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                  {typeSuggestions.map((type) => (
+                    <li key={type.value} onClick={() => handleTypeSuggestionClick(type)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                      {type.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <button
@@ -90,9 +156,7 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
 
       <div className="px-4">
         {hasSearched && filteredProperties.length === 0 ? (
-          <p className="text-center mt-12 text-gray-600">
-            No properties found.
-          </p>
+          <p className="text-center mt-12 text-gray-600">No properties found.</p>
         ) : (
           <PropertyGrid
             properties={propertiesToShow}
