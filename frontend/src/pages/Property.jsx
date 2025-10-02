@@ -154,7 +154,7 @@ const Property = () => {
                   setError("");
                 }}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition [&::-webkit-calendar-picker-indicator]:cursor-pointer"
               />
               <button
                 onClick={handleBookClick}

@@ -36,13 +36,13 @@ const ConfirmModal = ({
             <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={onConfirm}
-                className="px-4 py-2 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
+                className="px-4 py-2 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition cursor-pointer"
               >
                 Confirm
               </button>
@@ -54,15 +54,24 @@ const ConfirmModal = ({
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-16 w-16 text-green-500"
-                fill="none"
                 viewBox="0 0 24 24"
+                fill="none"
                 stroke="currentColor"
-                strokeWidth={1.5}
               >
+                {/* Part 1: The Circle*/}
+                <circle 
+                  cx="12" 
+                  cy="12" 
+                  r="10" 
+                  strokeWidth={1.5} 
+                />
+
+                {/* Part 2: The Checkmark*/}
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M9 12l2 2l4-4m1 2a7 7 0 11-14 0a7 7 0 0114 0z"
+                  strokeWidth={2}
+                  d="M8 12.5l3 3 5-5" 
                 />
               </svg>
               <h3 className="text-xl font-semibold text-gray-900">Booked!</h3>
@@ -75,7 +84,7 @@ const ConfirmModal = ({
 
               <button
                 onClick={onClose}
-                className="mt-4 px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition"
+                className="mt-4 px-6 py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition cursor-pointer"
               >
                 Close
               </button>
