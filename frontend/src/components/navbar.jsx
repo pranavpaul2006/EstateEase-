@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-// Recommended: npm install react-icons
-import { FiUser } from "react-icons/fi";
+import { FiUser, FiLogOut } from "react-icons/fi";
 
-// The Navbar now accepts an `isLoggedIn` prop
-function Navbar({ onLoginClick, isLoggedIn }) {
+function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -24,43 +22,61 @@ function Navbar({ onLoginClick, isLoggedIn }) {
           </Link>
         </div>
 
-        {/* Desktop links */}
+        {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/buy" className="text-white hover:text-gray-200 font-semibold">
+          <Link
+            to="/buy"
+            className="text-white hover:text-gray-200 font-semibold"
+          >
             BUY
           </Link>
-          <Link to="/rent" className="text-white hover:text-gray-200 font-semibold">
+          <Link
+            to="/rent"
+            className="text-white hover:text-gray-200 font-semibold"
+          >
             RENT
           </Link>
-          <Link to="/sell" className="text-white hover:text-gray-200 font-semibold">
+          <Link
+            to="/sell"
+            className="text-white hover:text-gray-200 font-semibold"
+          >
             SELL
           </Link>
-          <Link to="/Cart">
+          <Link to="/cart">
             <button className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer">
               WISH
             </button>
           </Link>
 
-          {/* === CONDITIONAL LOGIC FOR DESKTOP === */}
+          {/* Auth Buttons */}
           {isLoggedIn ? (
-            <Link to="/profile">
-              <button className="flex items-center gap-2 bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer">
-                <FiUser />
-                <span>MY ACCOUNT</span>
-              </button>
-            </Link>
+            <>
+              <Link to="/profile">
+                <button className="flex items-center gap-2 bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer">
+                  <FiUser />
+                  <span>MY ACCOUNT</span>
+                </button>
+              </Link>
+            </>
           ) : (
             <button
               onClick={onLoginClick}
-              className="bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer"
+              className="flex items-center gap-2 bg-white text-[#52ab98] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 cursor-pointer"
             >
-              LOGIN
+              <span>LOGIN</span>
             </button>
           )}
         </div>
 
         {/* Mobile Hamburger */}
-        <div className="md:hidden flex items-center">{/* ...hamburger button is unchanged... */}</div>
+        <div className="md:hidden flex items-center">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-white text-3xl"
+          >
+            &#9776;
+          </button>
+        </div>
       </div>
 
       {/* Mobile Dropdown */}
@@ -69,31 +85,53 @@ function Navbar({ onLoginClick, isLoggedIn }) {
           isOpen ? "max-h-96" : "max-h-0"
         }`}
       >
-        <div className="px-4 pt-4 pb-6 flex flex-col gap-2">
-          {/* ...other mobile links... */}
-          <Link to="/cart">
+        <div className="px-4 pt-4 pb-6 flex flex-col gap-4">
+          <Link
+            to="/buy"
+            onClick={() => setIsOpen(false)}
+            className="text-white font-semibold text-center py-2"
+          >
+            BUY
+          </Link>
+          <Link
+            to="/rent"
+            onClick={() => setIsOpen(false)}
+            className="text-white font-semibold text-center py-2"
+          >
+            RENT
+          </Link>
+          <Link
+            to="/sell"
+            onClick={() => setIsOpen(false)}
+            className="text-white font-semibold text-center py-2"
+          >
+            SELL
+          </Link>
+          <Link to="/cart" onClick={() => setIsOpen(false)}>
             <button className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
               WISH
             </button>
           </Link>
-          
-          {/* === CONDITIONAL LOGIC FOR MOBILE === */}
+
+          {/* Auth Buttons for Mobile */}
           {isLoggedIn ? (
-            <Link to="/profile">
-              <button className="w-full flex items-center justify-center gap-2 bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
-                <FiUser />
-                <span>MY ACCOUNT</span>
-              </button>
-            </Link>
+            <>
+              <Link to="/profile" onClick={() => setIsOpen(false)}>
+                <button className="w-full flex items-center justify-center gap-2 bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
+                  <FiUser />
+                  <span>MY ACCOUNT</span>
+                </button>
+              </Link>
+            </>
           ) : (
-             <button
+            <button
               onClick={() => {
                 onLoginClick();
                 setIsOpen(false);
               }}
-              className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100"
+              className="w-full flex items-center justify-center gap-2 bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100"
             >
-              LOGIN
+              <span>LOGIN</span>
             </button>
           )}
         </div>

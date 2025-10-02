@@ -67,7 +67,9 @@ function App() {
             path="/cart"
             element={
               <Cart
-                wishlistItems={properties.filter((p) => wishlist.includes(p.id))}
+                wishlistItems={properties.filter((p) =>
+                  wishlist.includes(p.id)
+                )}
                 onToggleWishlist={handleToggleWishlist}
               />
             }
@@ -109,7 +111,7 @@ function App() {
                 />
               </svg>
             </button>
-            <LoginBox onLoginSuccess={handleLoginSuccess} />
+            <LoginBox onAuthSuccess={handleLoginSuccess} />
           </div>
         </div>
       )}

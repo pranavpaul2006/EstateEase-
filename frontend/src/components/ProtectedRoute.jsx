@@ -1,16 +1,14 @@
-// src/components/ProtectedRoute.jsx
-
-import React from "react";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-function ProtectedRoute({ isLoggedIn, children }) {
-  if (!isLoggedIn) {
-    // If the user is not logged in, redirect them to the home page
-    return <Navigate to="/" replace />;
+export default function ProtectedRoute({ children }) {
+  const { session } = useAuth();
+
+  if (!session) {
+    // If there is no active session, redirect the user to the login page
+    return <Navigate to="/login" replace />;
   }
 
-  // If the user is logged in, show the page content
+  // If there is a session, render the children components
   return children;
 }
-
-export default ProtectedRoute;
