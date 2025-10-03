@@ -1,16 +1,25 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FiUser, FiLogOut } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
+import { FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 
 function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  // This function navigates to the homepage without a full page reload
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-[#52ab98] fixed w-full z-50 shadow-md">
       <div className="px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-4">
-          <Link to="/" className="flex items-center">
+          <a href="/" onClick={handleLogoClick} className="flex items-center">
             <img
               src="/images/estateease-logo.png"
               alt="EstateEase"
@@ -19,7 +28,7 @@ function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
             <span className="ml-2 font-bold text-2xl text-white select-none">
               EstateEase
             </span>
-          </Link>
+          </a>
         </div>
 
         {/* Desktop Links */}
@@ -29,12 +38,6 @@ function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
             className="text-white hover:text-gray-200 font-semibold"
           >
             BUY
-          </Link>
-          <Link
-            to="/rent"
-            className="text-white hover:text-gray-200 font-semibold"
-          >
-            RENT
           </Link>
           <Link
             to="/sell"
@@ -49,6 +52,7 @@ function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
           </Link>
 
           {/* Auth Buttons */}
+
           {isLoggedIn ? (
             <>
               <Link to="/profile">
@@ -71,10 +75,11 @@ function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
         {/* Mobile Hamburger */}
         <div className="md:hidden flex items-center">
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="text-white text-3xl"
+            onClick={toggleMenu}
+            className="text-white text-3xl focus:outline-none"
+            aria-label="Toggle menu"
           >
-            &#9776;
+            {isOpen ? <FiX /> : <FiMenu />}
           </button>
         </div>
       </div>
@@ -89,24 +94,18 @@ function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
           <Link
             to="/buy"
             onClick={() => setIsOpen(false)}
-            className="text-white font-semibold text-center py-2"
+            className="text-white py-2 font-semibold hover:text-gray-200"
           >
             BUY
           </Link>
           <Link
-            to="/rent"
-            onClick={() => setIsOpen(false)}
-            className="text-white font-semibold text-center py-2"
-          >
-            RENT
-          </Link>
-          <Link
             to="/sell"
             onClick={() => setIsOpen(false)}
-            className="text-white font-semibold text-center py-2"
+            className="text-white py-2 font-semibold hover:text-gray-200"
           >
             SELL
           </Link>
+          <hr className="border-white/20" />
           <Link to="/cart" onClick={() => setIsOpen(false)}>
             <button className="w-full bg-white text-[#52ab98] py-2 rounded-md font-semibold hover:bg-gray-100">
               WISH

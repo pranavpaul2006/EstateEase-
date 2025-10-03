@@ -1,6 +1,6 @@
 import React from "react";
 
-function ConfirmationModal({ message, onConfirm, onCancel }) {
+function Logoutbox({ message, onConfirm, onCancel }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-sm">
       {/* The changes are on the line below */}
@@ -26,4 +26,4 @@ function ConfirmationModal({ message, onConfirm, onCancel }) {
   );
 }
 
-export default ConfirmationModal;
+export default Logoutbox;

@@ -1,17 +1,29 @@
 // ADDED: Import useEffect and hooks/clients
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { FiEdit, FiLogOut, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FiEdit,
+  FiLogOut,
+  FiMail,
+  FiPhone,
+  FiMapPin,
+  FiTrash2,
+} from "react-icons/fi";
 import EditProfileModal from "./EditProfileModal";
-import ConfirmationModal from "./ConfirmationModal";
+import ConfirmationModal from "./logout_box";
 import Notification from "./Notification";
 import { useAuth } from "../context/AuthContext"; // ADDED
 import { supabase } from "../lib/supabaseClient"; // ADDED
 
 // REMOVED: mockUser object is no longer needed
 
-function UserProfile() {
-  // REMOVED: onLogout prop is no longer needed
+// Component now accepts all necessary props from App.jsx
+function UserProfile({
+  onLogout,
+  bookings,
+  onDeleteBooking,
+  listedProperties,
+}) {
   const navigate = useNavigate();
 
   // ADDED: Get user and signOut from our context
@@ -28,6 +40,8 @@ function UserProfile() {
     show: false,
     message: "",
   });
+
+  const [bookingToDelete, setBookingToDelete] = useState(null);
 
   // ADDED: useEffect to fetch profile data when the component mounts
   // In UserProfile.jsx
@@ -124,6 +138,13 @@ function UserProfile() {
     }
   };
 
+  const handleConfirmDelete = () => {
+    if (bookingToDelete) {
+      onDeleteBooking(bookingToDelete.id, bookingToDelete.bookingDate);
+      setBookingToDelete(null);
+    }
+  };
+
   // ADDED: Loading and error handling UI
   if (loading) {
     return <div className="text-center pt-48">Loading profile...</div>;
@@ -213,17 +234,103 @@ function UserProfile() {
               </ul>
             </div>
 
-            {/* My Properties section remains the same */}
+            {/* Booking History */}
             <div className="bg-white p-6 rounded-2xl shadow-lg mt-8">
               <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">
-                My Properties
+                Booking History
               </h3>
-              <div className="text-center text-gray-500 py-8">
-                <p>You have not listed any properties yet.</p>
-                <button className="mt-4 bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition cursor-pointer">
-                  List a Property
-                </button>
-              </div>
+              {bookings && bookings.length > 0 ? (
+                <div className="space-y-4">
+                  {bookings.map((booking) => (
+                    <div
+                      key={`${booking.id}-${booking.bookingDate}`}
+                      className="flex items-center gap-4 border-b pb-4 last:border-b-0 last:pb-0"
+                    >
+                      <img
+                        src={booking.img}
+                        alt={booking.location}
+                        className="w-24 h-20 object-cover rounded-md"
+                      />
+                      <div className="flex-grow">
+                        <p className="font-bold text-gray-800">
+                          {booking.location}
+                        </p>
+                        <p className="text-sm text-gray-600">{booking.type}</p>
+                      </div>
+                      <div className="text-right mr-4">
+                        <p className="font-semibold text-gray-700">
+                          Booked for:
+                        </p>
+                        <p className="text-sm text-blue-600">
+                          {booking.bookingDate}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setBookingToDelete(booking)}
+                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition cursor-pointer"
+                        aria-label="Delete booking"
+                      >
+                        <FiTrash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <p>You have no booking history yet.</p>
+                </div>
+              )}
+            </div>
+
+            {/* My Listed Properties */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg mt-8 mb-10">
+              <h3 className="text-xl font-semibold text-gray-800 border-b pb-4 mb-4">
+                My Listed Properties
+              </h3>
+              {listedProperties && listedProperties.length > 0 ? (
+                <div className="space-y-4">
+                  {listedProperties.map((property) => (
+                    <div
+                      key={property.id}
+                      className="flex items-center gap-4 border-b pb-4 last:border-b-0 last:pb-0"
+                    >
+                      <img
+                        src={
+                          property.images[0]?.preview ||
+                          "https://via.placeholder.com/150"
+                        }
+                        alt={property.location}
+                        className="w-24 h-20 object-cover rounded-md"
+                      />
+                      <div className="flex-grow">
+                        <p className="font-bold text-gray-800">
+                          {property.location}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {property.propertyType}
+                        </p>
+                        <p className="text-sm font-semibold text-green-600">
+                          ₹{parseInt(property.price).toLocaleString()}
+                        </p>
+                      </div>
+                      <Link to={`/property/${property.id}`}>
+                        <button className="bg-blue-500 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition cursor-pointer">
+                          View Details
+                        </button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  <p>You have not listed any properties yet.</p>
+                  <Link to="/sell">
+                    <button className="mt-4 bg-green-500 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-600 transition cursor-pointer">
+                      List a Property
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -243,7 +350,6 @@ function UserProfile() {
           onClose={() => setIsEditModalOpen(false)}
         />
       )}
-
       {showLogoutConfirm && (
         <ConfirmationModal
           message="Are you sure you want to log out?"
@@ -251,7 +357,13 @@ function UserProfile() {
           onCancel={() => setShowLogoutConfirm(false)}
         />
       )}
-
+      {bookingToDelete && (
+        <ConfirmationModal
+          message={`Are you sure you want to delete the booking for ${bookingToDelete.location}?`}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setBookingToDelete(null)}
+        />
+      )}
       {notification.show && (
         <Notification
           message={notification.message}

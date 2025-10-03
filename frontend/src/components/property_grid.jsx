@@ -2,34 +2,37 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
 
-function PropertyGrid({ properties = [], wishlist, onToggleWishlist }) {
+function PropertyGrid({ properties = [], wishlist = [], onToggleWishlist }) {
   return (
     <div className="mb-12 mt-8 px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {properties.map((property) => {
-        const isWishlisted = wishlist.includes(property.id);
+        const isWishlisted = Array.isArray(wishlist)
+          ? wishlist.includes(property.id)
+          : false;
 
         return (
           <div
             key={property.id}
             className="relative border rounded-xl shadow-lg overflow-hidden group transform transition duration-300 hover:scale-105 hover:shadow-2xl"
           >
-            {/* --- WISHLIST ICON BUTTON --- */}
+            {/* Wishlist Button */}
             <button
               onClick={() => onToggleWishlist(property.id)}
               className="absolute top-3 right-3 z-20 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition cursor-pointer"
               aria-label="Add to wishlist"
             >
               <FaHeart
-                className={`text-xl transition ${
-                  isWishlisted ? "text-red-500" : "text-gray-400"
-                }`}
+                className={`text-xl transition ${isWishlisted ? "text-red-500" : "text-gray-400"}`}
               />
             </button>
-            {/* --- END ICON --- */}
 
             {/* Image */}
             <div className="h-52 w-full overflow-hidden">
-              <img src={property.img} alt="Property" className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              <img
+                src={property.img}
+                alt={property.title || "Property"}
+                className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
             </div>
 
             {/* Info */}
