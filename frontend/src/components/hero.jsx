@@ -100,8 +100,8 @@ export default function Hero({ properties, wishlist, onToggleWishlist }) {
 
   return (
     <div className="w-full">
-      <div className="relative w-full h-[20rem] flex items-center justify-center bg-[#f2f2f2] z-30">
-        <div className="flex flex-col items-center justify-center px-4 w-full max-w-6xl text-center">
+      <div className="relative w-full h-[20rem] flex items-center justify-center bg-[#f2f2f2] bg-[url('/images/hero_bg.png')] bg-cover  bg-[30%_80%]  z-30">
+        <div className="flex flex-col items-center justify-center px-4 w-full max-w-6xl text-center ">
           <h1 className="text-black text-4xl md:text-5xl font-bold mb-6">Find Your Dream Property</h1>
           <p className="text-black/80 mb-6 max-w-2xl">Search from thousands of properties across your favorite cities</p>
 

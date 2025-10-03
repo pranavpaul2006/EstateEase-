@@ -15,7 +15,7 @@ function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
   };
 
   return (
-    <nav className="bg-[#52ab98] fixed w-full z-50 shadow-md">
+    <nav className="bg-[#52ab98]  fixed w-full z-50 shadow-md">
       <div className="px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-4">
@@ -86,7 +86,7 @@ function Navbar({ onLoginClick, isLoggedIn, onLogout }) {
 
       {/* Mobile Dropdown */}
       <div
-        className={`md:hidden bg-[#52ab98] overflow-hidden transition-[max-height] duration-300 ${
+        className={`md:hidden bg-[#52ab98]  overflow-hidden transition-[max-height] duration-300 ${
           isOpen ? "max-h-96" : "max-h-0"
         }`}
       >
