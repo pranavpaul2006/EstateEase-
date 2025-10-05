@@ -1,53 +1,180 @@
-// src/components/EditProfileModal.jsx
-
 import React, { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient"; 
 
 function EditProfileModal({ user, onSave, onClose }) {
-  // State to manage the form inputs
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     address: "",
+    profileImageUrl: "",
   });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState("");
 
-  // When the component loads, pre-fill the form with the current user's data
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        address: user.address,
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        profileImageUrl: user.profileImageUrl || "",
       });
+      setPreviewUrl(user.profileImageUrl || "");
     }
   }, [user]);
 
-  // Update state as the user types in the input fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Handle the form submission
-  const handleSubmit = (e) => {
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size too large! Please select an image under 5MB.");
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert("Please select a valid image file!");
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreviewUrl(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadToSupabase = async (file) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `profile-pictures/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('avatars') // Make sure this bucket exists
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData); // Pass the updated data back to the UserProfile page
+    setUploading(true);
+
+    try {
+      let imageUrl = formData.profileImageUrl;
+
+      // Upload new file if selected
+      if (selectedFile) {
+        imageUrl = await uploadToSupabase(selectedFile);
+      }
+
+      // Save profile with the image URL
+      await onSave({
+        ...formData,
+        profileImageUrl: imageUrl
+      });
+
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedFile(null);
+    setPreviewUrl("");
+    setFormData(prev => ({ ...prev, profileImageUrl: "" }));
   };
 
   return (
-    // Modal Backdrop
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 backdrop-blur-sm">
-      {/* Modal Content */}
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
+        <button 
+          onClick={onClose} 
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Edit Profile</h2>
+        
+        {/* Profile Picture Upload Section */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Profile Picture
+          </label>
+          
+          <div className="flex items-center space-x-6">
+            {/* Image Preview */}
+            <div className="relative">
+              <img
+                src={previewUrl || "https://via.placeholder.com/150"}
+                alt="Profile preview"
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
+              />
+            </div>
+
+            {/* Upload Controls */}
+            <div className="flex flex-col space-y-2">
+              <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-center text-sm">
+                Browse Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </label>
+              
+              {previewUrl && (
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition text-sm"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500 mt-2">
+            Supported formats: JPG, PNG, WebP. Max size: 5MB
+          </p>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Name
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name
             </label>
             <input
               type="text"
@@ -55,14 +182,13 @@ function EditProfileModal({ user, onSave, onClose }) {
               id="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
             />
           </div>
+
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
@@ -71,14 +197,13 @@ function EditProfileModal({ user, onSave, onClose }) {
               id="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
             />
           </div>
+
           <div>
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
               Phone
             </label>
             <input
@@ -87,39 +212,58 @@ function EditProfileModal({ user, onSave, onClose }) {
               id="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+
           <div>
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
               Address
             </label>
-            <input
-              type="text"
+            <textarea
               name="address"
               id="address"
               value={formData.address}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg"
+              rows="3"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+
+          {/* URL fallback input (hidden by default) */}
+          <div className="border-t pt-4">
+            <details className="text-sm">
+              <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                Or enter image URL
+              </summary>
+              <div className="mt-2">
+                <input
+                  type="url"
+                  name="profileImageUrl"
+                  value={formData.profileImageUrl}
+                  onChange={handleChange}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                />
+              </div>
+            </details>
+          </div>
+
           {/* Action Buttons */}
           <div className="flex justify-end gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer"
+              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer"
+              disabled={uploading}
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition cursor-pointer disabled:bg-blue-300"
             >
-              Save Changes
+              {uploading ? "Uploading..." : "Save Changes"}
             </button>
           </div>
         </form>

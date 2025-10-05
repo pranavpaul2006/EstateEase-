@@ -2,13 +2,22 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute({ children }) {
-  const { session } = useAuth();
+  const { session, loading } = useAuth();
 
-  if (!session) {
-    // If there is no active session, redirect the user to the login page
-    return <Navigate to="/login" replace />;
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
-  // If there is a session, render the children components
+  if (!session) {
+    // If there is no session, redirect to home page
+    return <Navigate to="/" replace />;
+  }
+
+  // If session exists, render the children components
   return children;
 }

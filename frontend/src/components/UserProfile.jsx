@@ -12,12 +12,9 @@ import {
 import EditProfileModal from "./EditProfileModal";
 import ConfirmationModal from "./logout_box";
 import Notification from "./Notification";
-import { useAuth } from "../context/AuthContext"; // ADDED
-import { supabase } from "../lib/supabaseClient"; // ADDED
+import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 
-// REMOVED: mockUser object is no longer needed
-
-// Component now accepts all necessary props from App.jsx
 function UserProfile({
   onLogout,
   bookings,
@@ -25,27 +22,20 @@ function UserProfile({
   listedProperties,
 }) {
   const navigate = useNavigate();
-
-  // ADDED: Get user and signOut from our context
   const { user, signOut } = useAuth();
 
-  // CHANGED: State is now for 'profile', loading, and errors
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [notification, setNotification] = useState({
     show: false,
     message: "",
   });
-
   const [bookingToDelete, setBookingToDelete] = useState(null);
 
-  // ADDED: useEffect to fetch profile data when the component mounts
-  // In UserProfile.jsx
-
+  // SINGLE useEffect for fetching profile
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
@@ -59,65 +49,104 @@ function UserProfile({
         const { data, error } = await supabase
           .from("profiles")
           .select("*")
-          .eq("id", user.id) // ✅ Correct: Use user.id from the auth context
+          .eq("id", user.id)
           .maybeSingle();
 
-        console.log("Supabase fetch result:", {
-          data,
-          error,
-          userId: user.id, // ✅ Correct
-        });
+        console.log("Supabase fetch result:", { data, error, userId: user.id });
 
         if (error) throw error;
 
         if (!data) {
-          // This is a good place to consider creating a default profile
-          // if one doesn't exist, but for now, an error is fine.
-          setError("No profile found for this user.");
-          return;
-        }
+          // Create a new profile if one doesn't exist
+          console.log("Creating new profile for user:", user.id);
+          const { data: newProfile, error: createError } = await supabase
+            .from("profiles")
+            .insert([
+              {
+                id: user.id,
+                email: user.email,
+                full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+                phone_number: '',
+                address: '',
+                profile_image_url: '',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              }
+            ])
+            .select()
+            .single();
 
-        setProfile(data);
+          if (createError) {
+            console.error("Error creating profile:", createError);
+            throw createError;
+          }
+          
+          console.log("New profile created:", newProfile);
+          setProfile(newProfile);
+        } else {
+          console.log("Existing profile found:", data);
+          setProfile(data);
+        }
       } catch (err) {
+        console.error("Error in fetchProfile:", err);
         setError(err.message || "Failed to fetch profile.");
-        console.error("Error fetching profile:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user]); // Re-run this effect if the user object changes
+  }, [user]);
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
   };
-
-  // CHANGED: Use signOut from our context
+  
   const handleConfirmLogout = async () => {
-    await signOut();
-    navigate("/");
-    setShowLogoutConfirm(false);
+    try {
+      console.log('🔄 Starting logout process...');
+      
+      // Sign out from Supabase
+      await signOut();
+      console.log('✅ Signed out from Supabase');
+      
+      // Clear any local storage
+      localStorage.clear();
+      console.log('✅ Cleared local storage');
+      
+      // Force redirect to home page
+      window.location.href = '/';
+      
+    } catch (error) {
+      console.error('❌ Logout error:', error);
+      // Still redirect even if there's an error
+      window.location.href = '/';
+    } finally {
+      setShowLogoutConfirm(false);
+    }
   };
 
-  // CHANGED: This function now updates the database
-  // In UserProfile.jsx
-
+  // SINGLE handleSaveProfile function
   const handleSaveProfile = async (updatedData) => {
     if (!user) return;
 
     try {
+      console.log("Updating profile with data:", updatedData);
+      
       const { error } = await supabase
         .from("profiles")
         .update({
           full_name: updatedData.name,
+          email: updatedData.email,
           phone_number: updatedData.phone,
           address: updatedData.address,
           profile_image_url: updatedData.profileImageUrl,
+          updated_at: new Date().toISOString(),
         })
-        .eq("id", user.id); // ✅ Correct: Use user.id here as well
+        .eq("id", user.id);
 
       if (error) {
+        console.error("Supabase update error:", error);
         throw error;
       }
 
@@ -125,6 +154,7 @@ function UserProfile({
       setProfile((prevProfile) => ({
         ...prevProfile,
         full_name: updatedData.name,
+        email: updatedData.email,
         phone_number: updatedData.phone,
         address: updatedData.address,
         profile_image_url: updatedData.profileImageUrl,
@@ -132,9 +162,10 @@ function UserProfile({
 
       setIsEditModalOpen(false);
       setNotification({ show: true, message: "Profile updated successfully!" });
+      
     } catch (error) {
-      setNotification({ show: true, message: `Error: ${error.message}` });
       console.error("Error updating profile:", error);
+      setNotification({ show: true, message: `Error: ${error.message}` });
     }
   };
 
@@ -145,23 +176,51 @@ function UserProfile({
     }
   };
 
-  // ADDED: Loading and error handling UI
+  // Loading and error handling UI
   if (loading) {
-    return <div className="text-center pt-48">Loading profile...</div>;
+    return (
+      <div className="bg-gray-50 min-h-screen pt-28 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
   }
+  
   if (error) {
-    return <div className="text-center pt-48 text-red-500">Error: {error}</div>;
+    return (
+      <div className="bg-gray-50 min-h-screen pt-28 flex items-center justify-center">
+        <div className="text-center text-red-500">
+          <p className="text-lg font-semibold">Error loading profile</p>
+          <p className="mt-2">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
   }
+  
   if (!profile) {
     return (
-      <div className="text-center pt-48">
-        No profile found. Please log in again.
+      <div className="bg-gray-50 min-h-screen pt-28 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">No profile found.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
     );
   }
 
-  // NOTE: The entire return block below is the same, just with `user.` replaced by `profile.`
-  // and database column names used (e.g., `profile.full_name`)
   return (
     <>
       <div className="bg-gray-50 min-h-screen pt-28 px-4 sm:px-6 lg:px-8">
@@ -170,21 +229,19 @@ function UserProfile({
           <div className="lg:col-span-1">
             <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
               <img
-                src={profile.profile_image_url} // CHANGED
+                src={profile.profile_image_url || "https://via.placeholder.com/150"}
                 alt="Profile"
-                className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-blue-500 p-1"
+                className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-blue-500 p-1 object-cover"
               />
               <h2 className="text-2xl font-bold text-gray-800">
                 {profile.full_name}
-              </h2>{" "}
-              {/* CHANGED */}
+              </h2>
               <p className="text-sm text-gray-500 mt-1">
                 Member since{" "}
                 {new Date(profile.created_at).toLocaleDateString("en-US", {
                   month: "long",
                   year: "numeric",
-                })}{" "}
-                {/* CHANGED */}
+                })}
               </p>
               <div className="mt-6 space-y-3">
                 <button
@@ -214,22 +271,19 @@ function UserProfile({
               <ul className="space-y-5 text-gray-700">
                 <li className="flex items-center text-lg">
                   <FiMail className="mr-4 text-gray-400 text-xl" />
-                  <span className="font-medium">{profile.email}</span>{" "}
-                  {/* CHANGED */}
+                  <span className="font-medium">{profile.email}</span>
                 </li>
                 <li className="flex items-center text-lg">
                   <FiPhone className="mr-4 text-gray-400 text-xl" />
                   <span className="font-medium">
                     {profile.phone_number || "Not provided"}
-                  </span>{" "}
-                  {/* CHANGED */}
+                  </span>
                 </li>
                 <li className="flex items-center text-lg">
                   <FiMapPin className="mr-4 text-gray-400 text-xl" />
                   <span className="font-medium">
                     {profile.address || "Not provided"}
-                  </span>{" "}
-                  {/* CHANGED */}
+                  </span>
                 </li>
               </ul>
             </div>
@@ -339,9 +393,9 @@ function UserProfile({
       {/* RENDER MODALS AND NOTIFICATIONS */}
       {isEditModalOpen && (
         <EditProfileModal
-          // Pass the profile data in the shape the modal expects
           user={{
             name: profile.full_name,
+            email: profile.email, // Make sure email is passed
             phone: profile.phone_number,
             address: profile.address,
             profileImageUrl: profile.profile_image_url,

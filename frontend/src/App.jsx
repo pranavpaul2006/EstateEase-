@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
+import { useAuth } from "./context/AuthContext"; // Add this import
 import Navbar from "./components/navbar";
 import Home from "./components/home";
 import Contact from "./pages/Contact";
@@ -10,19 +11,21 @@ import UserProfile from "./components/UserProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Buy from "./components/buy";
 import Sell from "./components/Sell";
-import AboutUs from "./components/aboutus"; // <-- NEW
-
-// Define a mock user to represent the person who is logged in.
-const MOCK_CURRENT_USER = { id: "user123", name: "Alex Doe" };
+import AboutUs from "./components/aboutus";
 
 function App() {
+  // --- Use Auth Context ---
+  const { user, loading } = useAuth();
+  
   // --- State Management ---
   const [showLogin, setShowLogin] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [properties, setProperties] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [listedProperties, setListedProperties] = useState([]);
+
+  // Use user from context to determine login status
+  const isLoggedIn = !!user;
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -32,30 +35,30 @@ function App() {
       .then((data) => setProperties(data.properties));
   }, []);
 
-  // This effect loads/clears user-specific data based on login status
+  // This effect loads/clears user-specific data based on REAL user login status
   useEffect(() => {
-    if (isLoggedIn) {
-      const bookingStorageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
+    if (user) {
+      // Use the actual user ID from context, not mock user
+      const bookingStorageKey = `estateBookings_${user.id}`;
       const storedBookings = JSON.parse(localStorage.getItem(bookingStorageKey) || "[]");
       setBookings(storedBookings);
 
-      const listingStorageKey = `estateListings_${MOCK_CURRENT_USER.id}`;
+      const listingStorageKey = `estateListings_${user.id}`;
       const storedListings = JSON.parse(localStorage.getItem(listingStorageKey) || "[]");
       setListedProperties(storedListings);
     } else {
       setBookings([]);
       setListedProperties([]);
     }
-  }, [isLoggedIn]);
+  }, [user]); // Depend on user from context
 
   // --- Handlers ---
   const handleLoginClick = () => setShowLogin(true);
   const handleCloseLogin = () => setShowLogin(false);
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
+    // No need to set isLoggedIn - auth context will handle this
     setShowLogin(false);
   };
-  const handleLogout = () => setIsLoggedIn(false);
 
   const handleToggleWishlist = (propertyId) => {
     setWishlist((prevWishlist) => {
@@ -68,15 +71,15 @@ function App() {
   };
   
   const refreshBookings = () => {
-    if (isLoggedIn) {
-      const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
+    if (user) {
+      const storageKey = `estateBookings_${user.id}`;
       setBookings(JSON.parse(localStorage.getItem(storageKey) || "[]"));
     }
   };
 
   const handleDeleteBooking = (propertyId, bookingDate) => {
-    if (!isLoggedIn) return;
-    const storageKey = `estateBookings_${MOCK_CURRENT_USER.id}`;
+    if (!user) return;
+    const storageKey = `estateBookings_${user.id}`;
     const storedBookings = JSON.parse(localStorage.getItem(storageKey) || "[]");
     const updatedBookings = storedBookings.filter(
       b => !(b.propertyId === propertyId && b.date === bookingDate)
@@ -86,15 +89,15 @@ function App() {
   };
   
   const refreshListedProperties = () => {
-    if (isLoggedIn) {
-      const storageKey = `estateListings_${MOCK_CURRENT_USER.id}`;
+    if (user) {
+      const storageKey = `estateListings_${user.id}`;
       setListedProperties(JSON.parse(localStorage.getItem(storageKey) || "[]"));
     }
   };
 
   const handleAddProperty = (formData) => {
-    if (!isLoggedIn) return;
-    const storageKey = `estateListings_${MOCK_CURRENT_USER.id}`;
+    if (!user) return;
+    const storageKey = `estateListings_${user.id}`;
     const existing = JSON.parse(localStorage.getItem(storageKey) || "[]");
     const newProperty = { 
       id: Date.now(), // Use timestamp for a unique ID
@@ -104,8 +107,25 @@ function App() {
     refreshListedProperties();
   };
 
+  // Debug logging
+  useEffect(() => {
+    console.log('👤 App - User state:', user);
+    console.log('⏳ App - Loading state:', loading);
+    console.log('🔐 App - Is logged in:', isLoggedIn);
+  }, [user, loading, isLoggedIn]);
+
+  // Show loading while auth is initializing
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div>
+      {/* Pass isLoggedIn from context to Navbar */}
       <Navbar onLoginClick={handleLoginClick} isLoggedIn={isLoggedIn} />
       <main>
         <Routes>
@@ -121,8 +141,8 @@ function App() {
               />
             }
           />
-          {/* KEEPING onAddProperty prop for Sell component */}
-          <Route path="/sell" element={<Sell onAddProperty={handleAddProperty} />} />
+          {/* Pass actual user to Sell component */}
+          <Route path="/sell" element={<Sell onAddProperty={handleAddProperty} currentUser={user} />} />
 
           {/* New About route */}
           <Route path="/about" element={<AboutUs />} />
@@ -144,18 +164,17 @@ function App() {
               <Property
                 properties={properties}
                 onBookProperty={refreshBookings}
-                currentUser={isLoggedIn ? MOCK_CURRENT_USER : null}
+                currentUser={user} // Use actual user from context
               />
             }
           />
 
-          {/* Protected Route */}
+          {/* Protected Route - use user from context */}
           <Route
             path="/profile"
             element={
               <ProtectedRoute isLoggedIn={isLoggedIn}>
                 <UserProfile
-                  onLogout={handleLogout}
                   bookings={bookings.map(booking => {
                     const property = properties.find(p => p.id === booking.propertyId);
                     return { ...property, bookingDate: booking.date };
