@@ -1,4 +1,3 @@
-// ADDED: Import useEffect and hooks/clients
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -18,7 +17,8 @@ import { supabase } from "../lib/supabaseClient";
 function UserProfile({
   onLogout,
   bookings,
-  onDeleteBooking,
+  setBookings, // 1. We will use this prop
+  onDeleteBooking, // 2. This prop will now be ignored
   listedProperties,
 }) {
   const navigate = useNavigate();
@@ -35,13 +35,12 @@ function UserProfile({
   });
   const [bookingToDelete, setBookingToDelete] = useState(null);
 
-  // SINGLE useEffect for fetching profile
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+    if (!user || !user.id) { // This check is correct
+      setLoading(false);
+      return;
+    }
 
       try {
         setLoading(true);
@@ -96,7 +95,59 @@ function UserProfile({
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user?.id]);
+
+  // This useEffect fetches appointments and populates the parent state
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      if (!user || !user.id) return; // This check is correct
+
+      console.log("--- STARTING TEST FETCH ---");
+      console.log("Fetching appointments for user.id:", user.id);
+
+      try {
+        // This is a SIMPLE query with NO JOINS
+        const { data, error } = await supabase
+          .from("appointments")
+          .select(`*`) // Select only from appointments
+          .eq("user_id", user.id)
+          .order("meeting_time", { ascending: false });
+
+        console.log("TEST FETCH DATA:", data);
+        console.log("TEST FETCH ERROR:", error);
+
+        if (error) throw error;
+
+        // Convert appointments to booking history format
+        const bookingHistory = (data || []).map(appointment => ({
+          //
+          // ***** THIS IS THE ONLY LINE I CHANGED *****
+          id: appointment.appointment_id,
+          //
+          //
+          location: "Test Location (ID: " + appointment.property_id.slice(0, 8) + "...",
+          type: "Test Appointment",
+          img: "https://via.placeholder.com/150",
+          bookingDate: new Date(appointment.meeting_time).toLocaleDateString("en-US", {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        }));
+
+        console.log("MAPPED TEST HISTORY:", bookingHistory);
+        
+        // This updates the state in the parent component
+        setBookings(bookingHistory); 
+
+      } catch (err) {
+        console.error("Error in test fetch:", err);
+      }
+    };
+
+    fetchAppointments();
+  }, [user?.id, setBookings]); // This is correct for your structure
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
@@ -169,10 +220,38 @@ function UserProfile({
     }
   };
 
-  const handleConfirmDelete = () => {
-    if (bookingToDelete) {
-      onDeleteBooking(bookingToDelete.id, bookingToDelete.bookingDate);
+  // This function is correct.
+  const handleConfirmDelete = async () => {
+    if (!bookingToDelete || !user) {
       setBookingToDelete(null);
+      return;
+    }
+
+    try {
+      // 1. Delete from Supabase (logic is now here)
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('appointment_id', bookingToDelete.id) // This will now work
+        .eq('user_id', user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // 2. Update the state in App.js by calling setBookings
+      console.log("Deleted. Updating UI...");
+      setBookings(prevBookings => 
+        prevBookings.filter(b => b.id !== bookingToDelete.id)
+      );
+
+      // 3. Close the modal
+      setBookingToDelete(null);
+
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+      setNotification({ show: true, message: `Error: ${error.message}` });
+      setBookingToDelete(null); // Close modal even on error
     }
   };
 
@@ -391,6 +470,9 @@ function UserProfile({
       </div>
 
       {/* RENDER MODALS AND NOTIFICATIONS */}
+
+      {/* 3. REMOVED DUPLICATE BOOKING HISTORY BLOCK FROM HERE */}
+
       {isEditModalOpen && (
         <EditProfileModal
           user={{
