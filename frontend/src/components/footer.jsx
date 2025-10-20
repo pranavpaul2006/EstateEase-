@@ -25,43 +25,6 @@ export default function Footer() {
             Curated listings, trusted agents, and secure transactions — your easy path
             to property ownership.
           </p>
-
-          <div className="flex items-center gap-3">
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="p-2 rounded-md bg-white/6 hover:bg-white/12 transition-transform transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/20"
-            >
-              <FaFacebookF />
-            </a>
-            <a
-              href="#"
-              aria-label="Twitter"
-              className="p-2 rounded-md bg-white/6 hover:bg-white/12 transition-transform transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/20"
-            >
-              <FaTwitter />
-            </a>
-            <a
-              href="#"
-              aria-label="Instagram"
-              className="p-2 rounded-md bg-white/6 hover:bg-white/12 transition-transform transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/20"
-            >
-              <FaInstagram />
-            </a>
-            <a
-              href="#"
-              aria-label="LinkedIn"
-              className="p-2 rounded-md bg-white/6 hover:bg-white/12 transition-transform transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-white/20"
-            >
-              <FaLinkedinIn />
-            </a>
-          </div>
-
-          <Link to="/contact" className="inline-block mt-3">
-            <button className="px-4 py-2 rounded-md bg-gradient-to-r from-[#5fc0b0] to-[#3ea79a] text-white font-medium shadow-sm hover:shadow-md transition-transform transform hover:-translate-y-0.5">
-              Contact Us
-            </button>
-          </Link>
         </div>
 
         {/* Quick Links */}
