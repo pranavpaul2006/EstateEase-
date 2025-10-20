@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiHome, FiDollarSign, FiUser, FiChevronLeft, FiChevronRight, FiCheckCircle, FiUploadCloud, FiX, FiLoader } from "react-icons/fi";
+import { supabase } from "../lib/supabaseClient";
 
 const AMENITIES_LIST = [
   "Swimming Pool", "Gym", "Parking", "Garden", "24/7 Security", "Balcony", "Fully Furnished", "Pet Friendly"
@@ -28,13 +29,29 @@ const Sell = ({ onAddProperty }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // **MODIFIED**: Fetches property types from your Supabase table
   useEffect(() => {
-    fetch("/data/dropdownData.json")
-      .then(res => res.json())
-      .then(data => {
-        setDropdownData(data);
-      })
-      .catch(err => console.error("Failed to load dropdown data:", err));
+    const fetchPropertyTypes = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('property_types')
+          .select('type_name');
+
+        if (error) throw error;
+
+        const formattedTypes = data.map(type => ({
+          label: type.type_name,
+          value: type.type_name
+        }));
+        
+        setDropdownData({ propertyTypes: formattedTypes });
+
+      } catch (error) {
+        console.error("Error fetching property types:", error.message);
+      }
+    };
+
+    fetchPropertyTypes();
   }, []);
 
   const handleChange = (e) => {
@@ -96,26 +113,112 @@ const Sell = ({ onAddProperty }) => {
     setStep((prev) => prev - 1);
   };
 
-  const handleSubmit = (e) => {
+  // **MODIFIED**: Submits all data to your Supabase tables
+  // In Sell.js
+
+const handleSubmit = async (e) => {
     e.preventDefault();
+    // --- All your validation logic stays the same ---
     const finalErrors = {};
     if (!formData.ownerName.trim()) finalErrors.ownerName = "Your name is required.";
     if (!formData.ownerEmail || !/\S+@\S+\.\S+/.test(formData.ownerEmail)) finalErrors.ownerEmail = "A valid email is required.";
     if (!formData.ownerPhone.trim()) finalErrors.ownerPhone = "A phone number is required.";
-    
     setErrors(finalErrors);
+    if (Object.keys(finalErrors).length > 0) return;
 
-    if (Object.keys(finalErrors).length === 0) {
-      setIsSubmitting(true);
-      setTimeout(() => {
+    setIsSubmitting(true);
+
+    try {
+        // --- Step 1 & 2: Get ownerId and propertyTypeId (Same as before) ---
+        let ownerId;
+        const { data: profileData } = await supabase.from('profiles').select('id').eq('email', formData.ownerEmail).single();
+
+        if (profileData) {
+            ownerId = profileData.id;
+        } else {
+            const { data: newProfileData, error: newProfileError } = await supabase
+                .from('profiles').insert({ full_name: formData.ownerName, email: formData.ownerEmail, phone_number: formData.ownerPhone }).select('id').single();
+            if (newProfileError) throw newProfileError;
+            ownerId = newProfileData.id;
+        }
+
+        const { data: typeData, error: typeError } = await supabase.from('property_types').select('id').eq('type_name', formData.propertyType).single();
+        if (typeError || !typeData) throw new Error(`Could not find property type: ${formData.propertyType}.`);
+        const propertyTypeId = typeData.id;
+
+        // --- Step 3: Insert the Property and GET THE NEW ID ---
+        const title = `${formData.propertyType} in ${formData.location}`;
+        
+        // **MODIFIED**: We use .select() to get the new property's ID back
+        const { data: newProperty, error: propertyInsertError } = await supabase
+            .from('properties')
+            .insert({
+                title: title,
+                property_description: formData.description,
+                property_type_id: propertyTypeId,
+                price: formData.price,
+                area_sqft: formData.area,
+                location: formData.location,
+                owner_id: ownerId,
+            })
+            .select('property_id')
+            .single(); // Use .single() because we're inserting one row
+
+        if (propertyInsertError) throw propertyInsertError;
+        const newPropertyId = newProperty.property_id;
+
+        // --- Step 4: Upload Images to Storage & Save URLs ---
+        if (formData.images.length > 0) {
+            // Create an array of promises for all image uploads
+            const uploadPromises = formData.images.map(imageFile => {
+                const fileName = `${newPropertyId}/${Date.now()}-${imageFile.file.name}`;
+                return supabase.storage
+                    .from('property-images') // Your bucket name
+                    .upload(fileName, imageFile.file);
+            });
+
+            // Wait for all uploads to complete
+            const uploadResults = await Promise.all(uploadPromises);
+
+            // Check for any upload errors
+            const uploadErrors = uploadResults.filter(result => result.error);
+            if (uploadErrors.length > 0) {
+                throw new Error('Failed to upload one or more images.');
+            }
+
+            // Get the public URLs for all uploaded files
+            const imageUrls = uploadResults.map(result => {
+                const { data } = supabase.storage.from('property-images').getPublicUrl(result.data.path);
+                return data.publicUrl;
+            });
+
+            // Create the rows to insert into property_images
+            const imageRows = imageUrls.map(url => ({
+                property_id: newPropertyId,
+                image_url: url,
+            }));
+
+            // Insert all image URLs into the property_images table
+            const { error: imageInsertError } = await supabase
+                .from('property_images')
+                .insert(imageRows);
+
+            if (imageInsertError) throw imageInsertError;
+        }
+
+        // If everything succeeded
+        setIsSubmitted(true);
         if (onAddProperty) {
             onAddProperty(formData);
         }
+
+    } catch (error) {
+        console.error('Error submitting property:', error);
+        alert(`Submission Failed: ${error.message}`);
+    } finally {
         setIsSubmitting(false);
-        setIsSubmitted(true);
-      }, 2000);
     }
-  };
+};
 
   if (isSubmitted) {
     return (
@@ -172,104 +275,104 @@ const Sell = ({ onAddProperty }) => {
             </div>
 
             <div className="flex-grow mt-8">
-                {step === 1 && (
-                <section className="space-y-6 animate-fade-in">
-                    <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800"><FiHome /> Basic Information</h2>
-                    <div>
-                        <label htmlFor="propertyType" className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
-                        <select id="propertyType" name="propertyType" value={formData.propertyType} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="" disabled>Select a property type</option>
-                            {dropdownData.propertyTypes.map(type => (
-                                <option key={type.value} value={type.label}>{type.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location / City</label>
-                        <input type="text" id="location" name="location" value={formData.location} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.location ? 'border-red-500' : 'border-gray-300'}`} />
-                        {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Property Images (Optional, Max 5)</label>
-                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors hover:border-blue-500 border-gray-300">
-                            <div className="space-y-1 text-center">
-                                <FiUploadCloud className="mx-auto h-12 w-12 text-gray-400"/>
-                                <div className="flex text-sm text-gray-600">
-                                    <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
-                                        <span>Upload files</span>
-                                        <input id="file-upload" name="file-upload" type="file" multiple onChange={handleFileChange} className="sr-only" accept="image/*" />
-                                    </label>
-                                    <p className="pl-1">or drag and drop</p>
-                                </div>
-                                <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
-                            </div>
-                        </div>
-                        <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-                            {formData.images.map((image, index) => (
-                                <div key={index} className="relative group aspect-square">
-                                    <img src={image.preview} alt={`preview ${index}`} className="h-full w-full object-cover rounded-md"/>
-                                    <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <FiX size={14}/>
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-                )}
+              {step === 1 && (
+              <section className="space-y-6 animate-fade-in">
+                  <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800"><FiHome /> Basic Information</h2>
+                  <div>
+                      <label htmlFor="propertyType" className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+                      <select id="propertyType" name="propertyType" value={formData.propertyType} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="" disabled>Select a property type</option>
+                          {dropdownData.propertyTypes.map(type => (
+                              <option key={type.value} value={type.label}>{type.label}</option>
+                          ))}
+                      </select>
+                  </div>
+                  <div>
+                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location / City</label>
+                      <input type="text" id="location" name="location" value={formData.location} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.location ? 'border-red-500' : 'border-gray-300'}`} />
+                      {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
+                  </div>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Property Images (Optional, Max 5)</label>
+                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors hover:border-blue-500 border-gray-300">
+                          <div className="space-y-1 text-center">
+                              <FiUploadCloud className="mx-auto h-12 w-12 text-gray-400"/>
+                              <div className="flex text-sm text-gray-600">
+                                  <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500">
+                                      <span>Upload files</span>
+                                      <input id="file-upload" name="file-upload" type="file" multiple onChange={handleFileChange} className="sr-only" accept="image/*" />
+                                  </label>
+                                  <p className="pl-1">or drag and drop</p>
+                              </div>
+                              <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+                          </div>
+                      </div>
+                      <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                          {formData.images.map((image, index) => (
+                              <div key={index} className="relative group aspect-square">
+                                  <img src={image.preview} alt={`preview ${index}`} className="h-full w-full object-cover rounded-md"/>
+                                  <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <FiX size={14}/>
+                                  </button>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              </section>
+              )}
 
-                {step === 2 && (
-                <section className="space-y-6 animate-fade-in">
-                    <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800"><FiDollarSign /> Details, Price & Amenities</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Expected Price (₹)</label>
-                            <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.price ? 'border-red-500' : 'border-gray-300'}`} />
-                            {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
-                        </div>
-                        <div>
-                            <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">Area (sq. ft.)</label>
-                            <input type="number" id="area" name="area" value={formData.area} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.area ? 'border-red-500' : 'border-gray-300'}`} />
-                            {errors.area && <p className="text-red-500 text-xs mt-1">{errors.area}</p>}
-                        </div>
-                    </div>
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
-                        <div className="flex flex-wrap gap-2">
-                            {AMENITIES_LIST.map(amenity => (
-                                <button type="button" key={amenity} onClick={() => handleAmenityToggle(amenity)} className={`px-3 py-1 text-sm rounded-full transition-colors cursor-pointer ${formData.amenities.includes(amenity) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                                    {amenity}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-                )}
+              {step === 2 && (
+              <section className="space-y-6 animate-fade-in">
+                  <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800"><FiDollarSign /> Details, Price & Amenities</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                          <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">Expected Price (₹)</label>
+                          <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.price ? 'border-red-500' : 'border-gray-300'}`} />
+                          {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+                      </div>
+                      <div>
+                          <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">Area (sq. ft.)</label>
+                          <input type="number" id="area" name="area" value={formData.area} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.area ? 'border-red-500' : 'border-gray-300'}`} />
+                          {errors.area && <p className="text-red-500 text-xs mt-1">{errors.area}</p>}
+                      </div>
+                  </div>
+                  <div>
+                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                  </div>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+                      <div className="flex flex-wrap gap-2">
+                          {AMENITIES_LIST.map(amenity => (
+                              <button type="button" key={amenity} onClick={() => handleAmenityToggle(amenity)} className={`px-3 py-1 text-sm rounded-full transition-colors cursor-pointer ${formData.amenities.includes(amenity) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                  {amenity}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+              </section>
+              )}
 
-                {step === 3 && (
-                <section className="space-y-4 animate-fade-in">
-                    <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800"><FiUser /> Your Contact Information</h2>
-                    <div>
-                        <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-                        <input type="text" id="ownerName" name="ownerName" value={formData.ownerName} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.ownerName ? 'border-red-500' : 'border-gray-300'}`} />
-                        {errors.ownerName && <p className="text-red-500 text-xs mt-1">{errors.ownerName}</p>}
-                    </div>
-                    <div>
-                        <label htmlFor="ownerEmail" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input type="email" id="ownerEmail" name="ownerEmail" value={formData.ownerEmail} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.ownerEmail ? 'border-red-500' : 'border-gray-300'}`} />
-                        {errors.ownerEmail && <p className="text-red-500 text-xs mt-1">{errors.ownerEmail}</p>}
-                    </div>
-                    <div>
-                        <label htmlFor="ownerPhone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input type="tel" id="ownerPhone" name="ownerPhone" value={formData.ownerPhone} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.ownerPhone ? 'border-red-500' : 'border-gray-300'}`} />
-                        {errors.ownerPhone && <p className="text-red-500 text-xs mt-1">{errors.ownerPhone}</p>}
-                    </div>
-                </section>
-                )}
+              {step === 3 && (
+              <section className="space-y-4 animate-fade-in">
+                  <h2 className="text-xl font-semibold flex items-center gap-2 text-gray-800"><FiUser /> Your Contact Information</h2>
+                  <div>
+                      <label htmlFor="ownerName" className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                      <input type="text" id="ownerName" name="ownerName" value={formData.ownerName} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.ownerName ? 'border-red-500' : 'border-gray-300'}`} />
+                      {errors.ownerName && <p className="text-red-500 text-xs mt-1">{errors.ownerName}</p>}
+                  </div>
+                  <div>
+                      <label htmlFor="ownerEmail" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                      <input type="email" id="ownerEmail" name="ownerEmail" value={formData.ownerEmail} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.ownerEmail ? 'border-red-500' : 'border-gray-300'}`} />
+                      {errors.ownerEmail && <p className="text-red-500 text-xs mt-1">{errors.ownerEmail}</p>}
+                  </div>
+                  <div>
+                      <label htmlFor="ownerPhone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                      <input type="tel" id="ownerPhone" name="ownerPhone" value={formData.ownerPhone} onChange={handleChange} className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.ownerPhone ? 'border-red-500' : 'border-gray-300'}`} />
+                      {errors.ownerPhone && <p className="text-red-500 text-xs mt-1">{errors.ownerPhone}</p>}
+                  </div>
+              </section>
+              )}
             </div>
 
             {/* Navigation Buttons */}
